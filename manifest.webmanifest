@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "Gymmy — tu compañero de gimnasio",
+  "short_name": "Gymmy",
+  "description": "Registra tus ejercicios, series y progreso incluso sin conexión.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#101612",
+  "theme_color": "#101612",
+  "icons": [
+    { "src": "./assets/icons/gymmy-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./assets/icons/gymmy-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./assets/icons/gymmy-maskable.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
