@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gymmy-shell-v5";
+const CACHE_VERSION = "gymmy-shell-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { validateCatalog } from "../src/catalog.js";
+import { sortByLatestUsage, validateCatalog } from "../src/catalog.js";
 import { latestEntry, loadState, saveState, validateState, STORAGE_KEY } from "../src/storage.js";
 import { elapsedMilliseconds, formatElapsedTime } from "../src/timer.js";
 
@@ -43,6 +43,20 @@ test("la última serie de un ejercicio se selecciona por fecha", () => {
   ];
   assert.equal(latestEntry(entries, "press-banca"), entries[2]);
   assert.equal(latestEntry(entries, "jalon-polea"), null);
+});
+
+test("el catálogo ordena primero las actividades usadas más recientemente", () => {
+  const activities = ["press-banca", "bicicleta-estatica", "cinta-correr", "sentadilla", "pec-deck"]
+    .map((id) => catalog.find((exercise) => exercise.id === id));
+  const history = [
+    { exerciseId: "press-banca", date: "2026-01-02T10:00:00.000Z" },
+    { exerciseId: "cinta-correr", date: "2026-01-03T10:00:00.000Z" },
+    { exerciseId: "sentadilla", date: "2026-01-01T10:00:00.000Z" }
+  ];
+  assert.deepEqual(
+    sortByLatestUsage(activities, history).map(({ id }) => id),
+    ["cinta-correr", "press-banca", "sentadilla", "bicicleta-estatica", "pec-deck"]
+  );
 });
 
 test("el estado valida registros y rechaza pesos/repeticiones inválidos", () => {

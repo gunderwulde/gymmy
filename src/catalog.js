@@ -1,5 +1,23 @@
 const REQUIRED_GROUPS = new Set(["chest", "back", "shoulders", "arms", "legs", "glutes", "core", "cardio"]);
 
+export function sortByLatestUsage(catalog, history) {
+  const latestDates = new Map();
+  for (const entry of history) {
+    const date = Date.parse(entry.date);
+    if (!latestDates.has(entry.exerciseId) || date > latestDates.get(entry.exerciseId)) {
+      latestDates.set(entry.exerciseId, date);
+    }
+  }
+  return catalog
+    .map((exercise, index) => ({ exercise, index, lastUsed: latestDates.get(exercise.id) ?? null }))
+    .sort((a, b) => {
+      if (a.lastUsed === null && b.lastUsed !== null) return 1;
+      if (a.lastUsed !== null && b.lastUsed === null) return -1;
+      return (b.lastUsed ?? 0) - (a.lastUsed ?? 0) || a.index - b.index;
+    })
+    .map(({ exercise }) => exercise);
+}
+
 export function validateCatalog(value) {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error("El catálogo de ejercicios está vacío o no tiene un formato válido.");

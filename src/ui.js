@@ -1,4 +1,5 @@
 import { elapsedMilliseconds, formatElapsedTime } from "./timer.js";
+import { sortByLatestUsage } from "./catalog.js";
 
 const GROUP_NAMES = {
   chest: "Pecho",
@@ -201,10 +202,7 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
     activeTimer = null;
     stopTimerTicker();
     const exercise = catalog.find((item) => item.id === exerciseId);
-    const card = document.getElementById(`exercise-${exerciseId}`);
-    const last = card?.querySelector(".last-session");
-    if (exercise && last) latestLine(exercise, last);
-    refreshTimerCards(exerciseId, "start");
+    renderExercises(exerciseId, '[data-timer-action="start"]');
     announce(`${exercise?.name ?? "Actividad"}: ${formatElapsedTime(durationSeconds * 1000)} registrado.`);
   }
 
@@ -350,21 +348,25 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
         history: [...state.history, entry]
       };
       if (save(nextState)) {
-        latestLine(exercise, last);
+        renderExercises(exercise.id, ".done-button");
         announce(`${exercise.name}: ${formatWeight(parsedWeight)} kg × ${parsedReps} registrado.`);
       }
     });
     return card;
   }
 
-  function renderExercises() {
+  function renderExercises(focusExerciseId, focusSelector) {
     const query = search.value.trim().toLocaleLowerCase("es");
-    const visible = catalog.filter((exercise) =>
+    const filtered = catalog.filter((exercise) =>
       (currentType === "all" || exercise.type === currentType) &&
       `${exercise.name} ${GROUP_NAMES[exercise.muscleGroup]}`.toLocaleLowerCase("es").includes(query)
     );
+    const visible = sortByLatestUsage(filtered, state.history);
     list.replaceChildren(...visible.map(createCard));
     refreshTimerCards();
+    if (focusExerciseId && focusSelector) {
+      document.querySelector(`#exercise-${focusExerciseId} ${focusSelector}`)?.focus();
+    }
     count.textContent = String(visible.length);
     empty.hidden = visible.length !== 0;
   }
