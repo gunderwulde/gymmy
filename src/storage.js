@@ -19,10 +19,14 @@ export function validateState(value) {
     }
   }
   for (const entry of value.history) {
-    if (!entry || typeof entry.exerciseId !== "string" ||
-        !Number.isFinite(entry.weight) || entry.weight < 0 ||
-        !Number.isInteger(entry.reps) || entry.reps < 1 ||
-        typeof entry.date !== "string" || Number.isNaN(Date.parse(entry.date))) {
+    const validDate = typeof entry?.date === "string" && !Number.isNaN(Date.parse(entry.date));
+    const validTimeEntry = entry?.mode === "time" &&
+      Number.isInteger(entry.durationSeconds) && entry.durationSeconds >= 1;
+    const validSetEntry = (entry?.mode === undefined || entry.mode === "sets") &&
+      Number.isFinite(entry?.weight) && entry.weight >= 0 &&
+      Number.isInteger(entry?.reps) && entry.reps >= 1;
+    if (!entry || typeof entry.exerciseId !== "string" || !validDate ||
+        (!validTimeEntry && !validSetEntry)) {
       throw new Error("Hay entradas del historial guardadas que no son válidas.");
     }
   }

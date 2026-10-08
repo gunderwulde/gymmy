@@ -1,3 +1,5 @@
+import { elapsedMilliseconds, formatElapsedTime } from "./timer.js";
+
 const GROUP_NAMES = {
   chest: "Pecho",
   back: "Espalda",
@@ -36,6 +38,8 @@ function formatLastDate(date) {
 export function mountUI(catalog, loaded, { latestEntry, saveState }) {
   let state = loaded.state;
   let persistenceBlocked = Boolean(loaded.blocked);
+  let activeTimer = null;
+  let timerInterval = null;
   const list = document.querySelector("#exercise-list");
   const search = document.querySelector("#search-input");
   const empty = document.querySelector("#empty-state");
@@ -73,12 +77,149 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
     }
   }
 
+  function stopTimerTicker() {
+    if (timerInterval !== null) {
+      window.clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function updateTimerDisplays() {
+    const now = performance.now();
+    for (const exercise of catalog) {
+      if (exercise.tracking !== "time") continue;
+      const card = document.getElementById(`exercise-${exercise.id}`);
+      const display = card?.querySelector(".timer-display");
+      if (!display) continue;
+      const isActive = activeTimer?.exerciseId === exercise.id;
+      const last = latestEntry(state.history, exercise.id);
+      const milliseconds = isActive
+        ? elapsedMilliseconds(activeTimer, now)
+        : (last?.durationSeconds ?? 0) * 1000;
+      display.textContent = formatElapsedTime(milliseconds);
+    }
+  }
+
+  function createTimerAction(exercise, action, label, className, disabled = false) {
+    const button = make("button", `timer-button ${className}`, label);
+    button.type = "button";
+    button.dataset.timerAction = action;
+    button.disabled = disabled;
+    button.setAttribute("aria-label", `${label}: ${exercise.name}`);
+    button.addEventListener("click", () => {
+      if (action === "start") startTimer(exercise.id);
+      if (action === "pause") pauseTimer(exercise.id);
+      if (action === "resume") resumeTimer(exercise.id);
+      if (action === "finish") finishTimer(exercise.id);
+    });
+    return button;
+  }
+
+  function refreshTimerCards(focusExerciseId, focusAction) {
+    for (const exercise of catalog) {
+      if (exercise.tracking !== "time") continue;
+      const card = document.getElementById(`exercise-${exercise.id}`);
+      const actions = card?.querySelector(".timer-actions");
+      if (!actions) continue;
+
+      const isActive = activeTimer?.exerciseId === exercise.id;
+      const isRunning = isActive && activeTimer.runningSince !== null;
+      const otherTimerRunning = activeTimer !== null && !isActive;
+      actions.replaceChildren();
+      if (!isActive) {
+        actions.append(createTimerAction(
+          exercise,
+          "start",
+          "Iniciar",
+          "timer-button--start",
+          otherTimerRunning
+        ));
+      } else {
+        actions.append(createTimerAction(
+          exercise,
+          isRunning ? "pause" : "resume",
+          isRunning ? "Pausar" : "Continuar",
+          isRunning ? "timer-button--pause" : "timer-button--resume"
+        ));
+        actions.append(createTimerAction(exercise, "finish", "Terminar", "timer-button--finish"));
+      }
+    }
+    updateTimerDisplays();
+    if (focusExerciseId && focusAction) {
+      document.querySelector(`#exercise-${focusExerciseId} [data-timer-action="${focusAction}"]`)?.focus();
+    }
+  }
+
+  function startTimerTicker() {
+    stopTimerTicker();
+    timerInterval = window.setInterval(updateTimerDisplays, 250);
+  }
+
+  function startTimer(exerciseId) {
+    if (activeTimer) {
+      announce("Termina la actividad en curso antes de iniciar otra.", true);
+      return;
+    }
+    activeTimer = { exerciseId, elapsedMs: 0, runningSince: performance.now() };
+    startTimerTicker();
+    refreshTimerCards(exerciseId, "pause");
+    announce("Cronómetro iniciado.");
+  }
+
+  function pauseTimer(exerciseId) {
+    if (!activeTimer || activeTimer.exerciseId !== exerciseId || activeTimer.runningSince === null) return;
+    activeTimer.elapsedMs = elapsedMilliseconds(activeTimer, performance.now());
+    activeTimer.runningSince = null;
+    stopTimerTicker();
+    refreshTimerCards(exerciseId, "resume");
+    announce("Actividad en pausa. El tiempo de pausa no se contará.");
+  }
+
+  function resumeTimer(exerciseId) {
+    if (!activeTimer || activeTimer.exerciseId !== exerciseId || activeTimer.runningSince !== null) return;
+    activeTimer.runningSince = performance.now();
+    startTimerTicker();
+    refreshTimerCards(exerciseId, "pause");
+    announce("Cronómetro en marcha.");
+  }
+
+  function finishTimer(exerciseId) {
+    if (!activeTimer || activeTimer.exerciseId !== exerciseId) return;
+    const durationSeconds = Math.floor(elapsedMilliseconds(activeTimer, performance.now()) / 1000);
+    if (durationSeconds < 1) {
+      announce("Registra al menos un segundo de actividad antes de terminar.", true);
+      return;
+    }
+    const entry = {
+      exerciseId,
+      mode: "time",
+      durationSeconds,
+      date: new Date().toISOString()
+    };
+    if (!save({ ...state, history: [...state.history, entry] })) return;
+
+    activeTimer = null;
+    stopTimerTicker();
+    const exercise = catalog.find((item) => item.id === exerciseId);
+    const card = document.getElementById(`exercise-${exerciseId}`);
+    const last = card?.querySelector(".last-session");
+    if (exercise && last) latestLine(exercise, last);
+    refreshTimerCards(exerciseId, "start");
+    announce(`${exercise?.name ?? "Actividad"}: ${formatElapsedTime(durationSeconds * 1000)} registrado.`);
+  }
+
   function latestLine(exercise, target) {
     const last = latestEntry(state.history, exercise.id);
     target.classList.toggle("no-session", !last);
-    target.textContent = last
-      ? `Última vez: ${formatLastDate(last.date)} · ${formatWeight(last.weight)} kg × ${last.reps}`
-      : "Aún no has registrado este ejercicio";
+    if (!last) {
+      target.textContent = "Aún no has registrado este ejercicio";
+    } else if (exercise.tracking === "time") {
+      target.textContent = last.durationSeconds
+        ? `Última vez: ${formatLastDate(last.date)} · ${formatElapsedTime(last.durationSeconds * 1000)}`
+        : `Última vez: ${formatLastDate(last.date)} · registro anterior sin duración`;
+    } else {
+      target.textContent = `Última vez: ${formatLastDate(last.date)} · ${formatWeight(last.weight)} kg × ${last.reps}`;
+    }
   }
 
   function createCard(exercise) {
@@ -95,6 +236,7 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
         image.src = "./assets/icons/image-placeholder.svg";
       }
     }, { once: true });
+    card.id = `exercise-${exercise.id}`;
     card.append(image);
 
     const info = make("div", "exercise-info");
@@ -109,6 +251,18 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
     info.append(last);
 
     const controls = make("div", "entry-controls");
+    if (exercise.tracking === "time") {
+      controls.classList.add("timer-controls");
+      const timerDisplay = make("output", "timer-display", "00:00:00");
+      timerDisplay.setAttribute("aria-label", `Tiempo transcurrido en ${exercise.name}`);
+      timerDisplay.setAttribute("aria-live", "off");
+      const actions = make("div", "timer-actions");
+      controls.append(timerDisplay, actions);
+      info.append(controls);
+      card.append(info);
+      return card;
+    }
+
     const saved = state.values[exercise.id];
     const previous = latestEntry(state.history, exercise.id);
     const startingWeight = saved?.weight ?? previous?.weight ?? exercise.defaultWeight;
@@ -210,6 +364,7 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
       `${exercise.name} ${GROUP_NAMES[exercise.muscleGroup]}`.toLocaleLowerCase("es").includes(query)
     );
     list.replaceChildren(...visible.map(createCard));
+    refreshTimerCards();
     count.textContent = String(visible.length);
     empty.hidden = visible.length !== 0;
   }
@@ -254,7 +409,10 @@ export function mountUI(catalog, loaded, { latestEntry, saveState }) {
         description.append(make("span", "history-time", new Intl.DateTimeFormat("es-ES", {
           hour: "2-digit", minute: "2-digit"
         }).format(new Date(entry.date))));
-        row.append(description, make("span", "history-result", `${formatWeight(entry.weight)} kg × ${entry.reps}`));
+        const result = entry.mode === "time"
+          ? formatElapsedTime(entry.durationSeconds * 1000)
+          : `${formatWeight(entry.weight)} kg × ${entry.reps}`;
+        row.append(description, make("span", "history-result", result));
         fragment.append(row);
       }
     }

@@ -12,5 +12,6 @@
   { "id": "curl-femoral", "name": "Curl femoral", "type": "machine", "muscleGroup": "legs", "image": "assets/exercises/curl-femoral.svg", "defaultWeight": 20, "defaultReps": 12 },
   { "id": "peso-muerto", "name": "Peso muerto", "type": "exercise", "muscleGroup": "glutes", "image": "assets/exercises/peso-muerto.svg", "defaultWeight": 30, "defaultReps": 8 },
   { "id": "plancha", "name": "Plancha", "type": "exercise", "muscleGroup": "core", "image": "assets/exercises/plancha.svg", "defaultWeight": 0, "defaultReps": 1 },
-  { "id": "bicicleta-estatica", "name": "Bicicleta estática", "type": "machine", "muscleGroup": "cardio", "image": "assets/exercises/bicicleta-estatica.svg", "defaultWeight": 0, "defaultReps": 20 }
+  { "id": "bicicleta-estatica", "name": "Bicicleta estática", "type": "machine", "muscleGroup": "cardio", "tracking": "time", "image": "assets/exercises/bicicleta-estatica.svg" },
+  { "id": "cinta-correr", "name": "Cinta de correr", "type": "machine", "muscleGroup": "cardio", "tracking": "time", "image": "assets/exercises/cinta-correr.svg" }
 ]

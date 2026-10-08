@@ -7,6 +7,7 @@ Gymmy es una aplicación web progresiva (PWA) para llevar un registro de tus ent
 - Catálogo de máquinas y ejercicios con ilustraciones SVG locales.
 - Filtros por tipo y búsqueda por nombre o grupo muscular.
 - Peso y repeticiones editables; cada pulsación de **Hecho** añade una serie al historial.
+- Cinta de correr y bicicleta estática con cronómetro `HH:MM:SS`; las pausas no cuentan en la duración y al terminar se guarda el tiempo en el historial.
 - Recordatorio de la fecha, el peso y las repeticiones de la última sesión de cada ejercicio.
 - Historial cronológico con filtro por ejercicio.
 - Datos guardados en el almacenamiento local del navegador; no se envían a un servidor.

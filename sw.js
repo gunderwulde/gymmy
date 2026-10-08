@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gymmy-shell-v4";
+const CACHE_VERSION = "gymmy-shell-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./src/main.js",
   "./src/catalog.js",
   "./src/storage.js",
+  "./src/timer.js",
   "./src/ui.js",
   "./data/exercises.json",
   "./assets/icons/gymmy-192.svg",
@@ -26,7 +27,8 @@ const APP_SHELL = [
   "./assets/exercises/curl-femoral.svg",
   "./assets/exercises/peso-muerto.svg",
   "./assets/exercises/plancha.svg",
-  "./assets/exercises/bicicleta-estatica.svg"
+  "./assets/exercises/bicicleta-estatica.svg",
+  "./assets/exercises/cinta-correr.svg"
 ];
 
 self.addEventListener("install", (event) => {

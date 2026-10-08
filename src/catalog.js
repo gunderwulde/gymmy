@@ -10,11 +10,19 @@ export function validateCatalog(value) {
         typeof item.id !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id) ||
         typeof item.name !== "string" || item.name.trim() === "" ||
         !["machine", "exercise"].includes(item.type) ||
+        (item.tracking !== undefined && !["sets", "time"].includes(item.tracking)) ||
         !REQUIRED_GROUPS.has(item.muscleGroup) ||
-        typeof item.image !== "string" || !item.image.startsWith("assets/exercises/") ||
-        !Number.isFinite(item.defaultWeight) || item.defaultWeight < 0 ||
-        !Number.isInteger(item.defaultReps) || item.defaultReps < 1) {
+        typeof item.image !== "string" || !item.image.startsWith("assets/exercises/")) {
       throw new Error(`Hay una entrada incompleta o inválida en el catálogo${item?.id ? ` (${item.id})` : ""}.`);
+    }
+    const tracking = item.tracking ?? "sets";
+    if (tracking === "time") {
+      if ("defaultWeight" in item || "defaultReps" in item) {
+        throw new Error(`La actividad por tiempo «${item.id}» no debe definir peso ni repeticiones.`);
+      }
+    } else if (!Number.isFinite(item.defaultWeight) || item.defaultWeight < 0 ||
+        !Number.isInteger(item.defaultReps) || item.defaultReps < 1) {
+      throw new Error(`Hay valores iniciales incompletos o inválidos en «${item.id}».`);
     }
     if (ids.has(item.id)) throw new Error(`El catálogo contiene el identificador duplicado «${item.id}».`);
     ids.add(item.id);

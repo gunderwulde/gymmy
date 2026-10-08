@@ -6,10 +6,11 @@ Construye una aplicación web companion para entrenamientos de gimnasio, instala
 
 ## Funcionalidad
 
-- Muestra máquinas y ejercicios típicos en una lista desplazable. Cada elemento incluye nombre, ilustración a la izquierda, peso editable y número de repeticiones editable, además de un botón «Hecho».
+- Muestra máquinas y ejercicios típicos en una lista desplazable. Cada elemento incluye nombre e ilustración a la izquierda. Los ejercicios de fuerza ofrecen peso y repeticiones editables más «Hecho»; las actividades con `tracking: "time"` ofrecen cronómetro y controles de actividad.
 - Al pulsar «Hecho», añade al historial una entrada con id del ejercicio, peso (kg), repeticiones y fecha y hora ISO. Pulsar varias veces genera varias entradas (series); no sobrescribas las anteriores.
 - Cada elemento actúa como recordatorio: sus campos de peso y repeticiones se inicializan con los de la última entrada registrada de ese ejercicio y muestra un texto breve con la fecha de la última vez (por ejemplo, «Última vez: 05/10/2026 · 40 kg × 10»). Sin historial, usa los valores por defecto del catálogo.
 - Un botón de progreso abre una ventana emergente (`<dialog>`) con el historial. Agrupa por día, del más reciente al más antiguo, y permite ver el de un ejercicio concreto (p. ej. filtro o acceso desde su entrada) con peso y repeticiones por fecha.
+- Las actividades temporizadas muestran `HH:MM:SS`, y ofrecen «Iniciar», «Pausar»/«Continuar» y «Terminar». El cronómetro acumula tiempo monotónico activo, excluye las pausas y guarda la duración al terminar. Solo puede haber una actividad temporizada en marcha a la vez.
 - Distingue visualmente máquinas de ejercicios libres (etiqueta o icono) y permite filtrarlos o buscarlos por nombre si la lista es larga.
 
 ## Stack y estructura
@@ -32,6 +33,7 @@ Construye una aplicación web companion para entrenamientos de gimnasio, instala
     "id": "press-banca",
     "name": "Press de banca",
     "type": "exercise",
+    "tracking": "sets",
     "muscleGroup": "chest",
     "image": "assets/exercises/press-banca.svg",
     "defaultWeight": 20,
@@ -39,7 +41,7 @@ Construye una aplicación web companion para entrenamientos de gimnasio, instala
   }
   ```
 
-  `type` es `machine` o `exercise`. Los `id` son únicos, estables y en kebab-case; nunca los renombres, porque el historial depende de ellos. Los textos visibles van en español.
+  `type` es `machine` o `exercise`; `tracking` es opcional y puede ser `sets` (por defecto) o `time`. Las actividades temporizadas deben declarar `"tracking": "time"` y omitir `defaultWeight` y `defaultReps`; las demás entradas requieren ambos valores iniciales. Los `id` son únicos, estables y en kebab-case; nunca los renombres, porque el historial depende de ellos. Los textos visibles van en español.
 - Genera una ilustración por entrada, con el mismo nombre que su `id`. Crea las imágenes como SVG con estilo uniforme (mismo tamaño y viewBox, trazo simple y paleta común), ligeras y sin referencias externas. Verifica que cada `image` apunta a un archivo existente y que no sobra ninguno sin usar.
 - Valida el catálogo al cargarlo (campos obligatorios, tipos, `id` únicos) y muestra un error visible si es inválido.
 
@@ -70,7 +72,7 @@ Construye una aplicación web companion para entrenamientos de gimnasio, instala
 ## Desarrollo y calidad
 
 - Mantén separadas las responsabilidades de catálogo, almacenamiento, interfaz y registro; la lógica de validación e historial debe ser testeable sin DOM.
-- Añade pruebas unitarias para validación del catálogo, validación de entradas, persistencia/migración y selección de la última entrada. Ejecútalas con el script `npm test` cuando exista.
+- Añade pruebas unitarias para validación del catálogo, entradas de fuerza y tiempo, persistencia/migración, selección de la última entrada y cálculo/formato del cronómetro. Ejecútalas con el script `npm test` cuando exista.
 - Comprueba una PWA instalable (manifiesto e iconos válidos) y, en el navegador, el flujo completo: editar valores, pulsar «Hecho», ver el progreso y recargar conservando los datos.
 - Verifica el modo sin conexión de verdad: tras la primera carga, activa «Sin conexión» en las herramientas de desarrollo y confirma que la app, el catálogo y todas las imágenes cargan. No afirmes que funciona offline sin haberlo comprobado.
 - Si el usuario pide solo ciertos archivos, limítate a ellos y no generes el resto.

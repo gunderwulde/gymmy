@@ -67,6 +67,7 @@ h2 { margin: 0; font-size: 25px; letter-spacing: -.7px; }
 .last-session { min-height: 15px; margin: 0 0 10px; color: #a8b79e; font-size: 10px; line-height: 1.4; }
 .last-session.no-session { color: #77837a; }
 .entry-controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 7px; align-items: end; }
+.entry-controls.timer-controls { grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: stretch; }
 .field-label { min-width: 0; display: grid; gap: 4px; color: var(--muted); font-size: 9px; }
 .field-input { width: 100%; height: 35px; padding: 0 8px; border: 1px solid #35433a; border-radius: 8px; outline: 0; background: #111813; color: var(--text); font-size: 12px; }
 .field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #c3f36b22; }
@@ -74,6 +75,14 @@ h2 { margin: 0; font-size: 25px; letter-spacing: -.7px; }
 .done-button { height: 35px; padding: 0 10px; display: inline-flex; justify-content: center; align-items: center; gap: 5px; border: 0; border-radius: 8px; background: var(--accent); color: #17220f; cursor: pointer; font-size: 11px; font-weight: 800; transition: filter .15s; }
 .done-button:hover { filter: brightness(1.08); }
 .done-button svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.timer-display { display: block; color: var(--accent); font-size: 25px; font-variant-numeric: tabular-nums; font-weight: 750; letter-spacing: 1px; line-height: 1.25; }
+.timer-actions { display: flex; gap: 8px; }
+.timer-button { min-width: 0; min-height: 36px; flex: 1; padding: 0 10px; border: 1px solid transparent; border-radius: 9px; cursor: pointer; font-size: 11px; font-weight: 800; transition: filter .15s, background .15s; }
+.timer-button:hover:not(:disabled) { filter: brightness(1.08); }
+.timer-button:disabled { cursor: not-allowed; opacity: .45; }
+.timer-button--start, .timer-button--resume { background: var(--accent); color: #17220f; }
+.timer-button--pause { border-color: #465747; background: #263329; color: var(--text); }
+.timer-button--finish { border-color: #65413d; background: #342421; color: #ffc0b7; }
 .field-error { grid-column: 1 / -1; min-height: 0; color: var(--danger); font-size: 10px; }
 .empty-state { margin: 0; padding: 28px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; font-size: 13px; }
 .app-message { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #536c3b; border-radius: 10px; background: #202d19; color: #d7edbe; font-size: 12px; }
