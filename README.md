@@ -11,24 +11,23 @@ Publicada en <https://gunderwulde.github.io/gymmy/>.
 - Cada elemento actúa como recordatorio: peso y repeticiones se inicializan con los de la última entrada de ese ejercicio y se muestra un texto como «Última vez: 05/10/2026 · 40 kg × 10». Sin historial, se usan los valores por defecto del catálogo.
 - El catálogo se ordena por última fecha de uso, primero la actividad más reciente; las que no tienen historial quedan al final en el orden original. Se reordena tras cada registro completado.
 - Un botón de progreso abre una ventana emergente (`<dialog>`) con el historial agrupado por día, del más reciente al más antiguo, con filtro por ejercicio y peso y repeticiones por fecha.
-- Las actividades temporizadas (cinta de correr, bicicleta estática) muestran `HH:MM:SS` y ofrecen «Iniciar», «Pausar»/«Continuar» y «Terminar». El cronómetro acumula tiempo monotónico activo, excluye las pausas y guarda la duración al terminar. Solo puede haber una actividad temporizada en marcha a la vez.
-- Las máquinas se distinguen visualmente de los ejercicios libres (etiqueta) y la lista se puede filtrar por tipo y buscar por nombre o grupo muscular.
+- Las actividades temporizadas (cinta de correr, bicicleta estática) muestran `HH:MM:SS` y ofrecen «Iniciar», «Pausar»/«Continuar» y «Terminar». El tiempo se calcula con timestamps de reloj (`Date.now()` en milisegundos), no contando intervalos: mientras está en marcha se conserva el timestamp de inicio y se muestra el tiempo acumulado más la diferencia hasta ahora. Así, al reanudar la app después de que el móvil haya quedado en reposo, el tiempo transcurrido se actualiza correctamente. Al pausar, se suma el tramo transcurrido al acumulado y se guarda; al continuar, se toma un nuevo timestamp de inicio sin perder lo acumulado. Al terminar, se suma el último tramo y se guarda la duración. Solo puede haber una actividad temporizada en marcha a la vez.
+- Las máquinas se distinguen visualmente de los ejercicios libres (etiqueta en la tarjeta). La lista se filtra por zona (Todos, Superiores, Inferiores y Cardio) y se puede buscar por nombre o grupo muscular.
 
 ## Stack y estructura
 
-Stack objetivo:
+- Vue 3 con TypeScript y Vite; Pinia para el estado de interfaz; Dexie.js sobre IndexedDB para los datos locales; `vite-plugin-pwa` para manifiesto, service worker y precaché.
+- No hay archivos `.js` en el código fuente de la aplicación; Vite genera JavaScript empaquetado para el navegador. No se usa Axios ni otra librería HTTP externa. Gymmy no necesita comunicaciones HTTP ni credenciales para sus funciones locales y offline.
+- No se usa LocalStorage ni cookies: valores editados, historial y sesión del cronómetro se guardan en IndexedDB.
+- ESLint, Prettier y Vitest son herramientas de desarrollo. Las responsabilidades se separan entre componentes Vue, store Pinia, módulos de dominio testeables sin DOM y capa Dexie.
+- No se hacen peticiones HTTP. Si se incorpora una integración remota, se encapsulará exclusivamente en `Back4AppClient` con `fetch` nativo y nunca expondrá la Master Key.
+- Para desarrollo local, ejecuta `npm run dev`; el service worker requiere un origen seguro como `localhost`, no `file://`.
 
-- Vue 3 con TypeScript y Vite; Pinia para el estado de la interfaz; Dexie.js sobre IndexedDB para los datos locales; `vite-plugin-pwa` para manifiesto, service worker y precaché. No se añade otro framework ni otra solución de estado o persistencia.
-- `fetch` nativo encapsulado en un cliente REST tipado y reutilizable cuando una función necesite un servicio. Las funciones principales deben funcionar sin red y sin depender de una API.
-- ESLint (lint), Prettier (formato) y Vitest (pruebas), como `devDependencies`.
-- Desarrollo local con el servidor de Vite (`npm run dev`); el service worker requiere un origen seguro como `localhost`, no `file://`.
-- Responsabilidades separadas: componentes Vue (interfaz), stores Pinia (estado de presentación), módulos de dominio testeables sin DOM y con tipos explícitos, capa Dexie (persistencia) y cliente API.
-
-Estado actual de la implementación: HTML, CSS y JavaScript con módulos ES, sin compilación, servida como archivos estáticos con `localStorage` y un service worker propio:
-
-- `index.html`, `styles.css`, `manifest.webmanifest`, `sw.js` en la raíz.
-- `src/`: `catalog.js` (carga, validación, orden), `storage.js` (estado y persistencia), `timer.js` (cronómetro), `ui.js` (render y eventos) y `main.js`.
+- `index.html`, `styles.css`, `vite.config.ts` y configuración TypeScript en la raíz.
+- `src/`: interfaz Vue, store Pinia, validación y orden del catálogo, persistencia Dexie y lógica del cronómetro.
+- Interfaz dividida en componentes, cada uno en su directorio con su README (ver `src/README.md` y `src/components/README.md`): `App.vue` es un contenedor que compone `AppHeader` y `ExerciseList`, más `HistoryDialog` y `UpdateBanner`. `ExerciseList` usa `ExerciseCardSets` para ejercicios por series y `ExerciseCardTimed` para actividades temporizadas.
 - `data/exercises.json`, `assets/exercises/` y `assets/icons/`.
+- Vite copia el catálogo y todos los recursos locales a la salida de producción para incluirlos en el precaché completo de Workbox.
 
 ## Catálogo (`data/exercises.json`)
 
@@ -55,7 +54,7 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
 
 ## Persistencia
 
-- Valores editados e historial se guardan localmente con clave/esquema versionado y migraciones (actualmente `localStorage`, clave `gymmy:v1`; en el stack objetivo, IndexedDB con Dexie y transacciones). Se solicita `navigator.storage.persist()`.
+- Valores editados, historial y sesión del cronómetro se guardan en IndexedDB con Dexie; los registros se escriben mediante transacciones. La sesión temporizada persiste el id de la actividad, los milisegundos activos acumulados y el timestamp del tramo en marcha; cada pausa consolida el tramo antes de iniciar otro al continuar. Se solicita `navigator.storage.persist()`.
 - El historial referencia los ejercicios por `id`. Si un `id` ya no existe en el catálogo, la entrada se conserva y se muestra con un nombre genérico.
 - Si los datos guardados están corruptos, no se borran ni sobrescriben en silencio: se avisa al usuario y se conserva una copia de seguridad.
 - El catálogo está separado del estado del usuario; actualizar el catálogo o la app nunca borra historial ni valores editados.
@@ -67,7 +66,7 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
 - Precaché en la instalación de todos los recursos de la experiencia principal: HTML, CSS, JS, `data/exercises.json`, ilustraciones, iconos y fuentes locales; no se cachea solo lo visitado.
 - Cache-first para recursos estáticos, con navegación que responde `index.html` desde caché sin red.
 - Sin dependencias de red, cuentas, CDN ni servicios externos.
-- Caché versionada (`CACHE_VERSION` en `sw.js`) con limpieza de cachés antiguas en `activate`; en el stack objetivo lo gestiona `vite-plugin-pwa`. Cada cambio de recurso incrementa la versión y se avisa al usuario de que hay una actualización disponible sin recargar de golpe.
+- `vite-plugin-pwa` y Workbox precachean los archivos de la experiencia principal y administran la versión y limpieza de cachés. La app avisa cuando hay una actualización y espera a que el usuario la aplique.
 
 ## Interfaz y accesibilidad
 
@@ -79,6 +78,7 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
 
 ## Pruebas y calidad
 
-- Pruebas unitarias de validación del catálogo, entradas de fuerza y tiempo, persistencia/migración, selección de la última entrada, orden por último uso y cálculo/formato del cronómetro: `npm test`.
-- Para probar en local con la implementación actual: `npx serve .` (no abrir con `file://`).
+- Pruebas unitarias de validación del catálogo, entradas de fuerza y tiempo, persistencia IndexedDB, selección de la última entrada, orden por último uso y cálculo/formato del cronómetro: `npm test`.
+- Comprobaciones disponibles: `npm run typecheck`, `npm run lint`, `npm run format:check` y `npm run build`.
+- Para probar localmente: `npm run dev` (no abrir con `file://`).
 - Un workflow de GitHub Actions ejecuta las pruebas y publica en GitHub Pages al subir a `main` (Settings → Pages → Source → GitHub Actions).

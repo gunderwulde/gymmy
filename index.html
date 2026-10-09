@@ -1,89 +1,21 @@
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#101612">
-    <meta name="description" content="Tu compañero de gimnasio. Registra tus series y consulta tu progreso, también sin conexión.">
-    <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="icon" href="./assets/icons/gymmy-192.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles.css">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101612" />
+    <meta
+      name="description"
+      content="Tu compañero de gimnasio. Registra tus series y consulta tu progreso, también sin conexión."
+    />
+    <link rel="icon" href="./assets/icons/gymmy-192.svg" type="image/svg+xml" />
     <title>Gymmy — tu entrenamiento</title>
   </head>
   <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="./" aria-label="Gymmy, inicio">
-          <span class="brand-mark" aria-hidden="true">G</span>
-          <span>gymmy<span class="brand-period">.</span></span>
-        </a>
-        <div class="header-actions">
-          <span id="connection-status" class="connection-status"><span class="status-dot"></span>En línea</span>
-          <button id="install-button" class="icon-button install-button" type="button" hidden>Instalar</button>
-          <button id="history-button" class="icon-button history-button" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5h16M4 12h16M4 18.5h16M8 3v5M16 9.5v5M10 16v5"/></svg>
-            <span>Progreso</span>
-          </button>
-        </div>
-      </header>
-
-      <main>
-        <section class="hero" aria-labelledby="page-title">
-          <div>
-            <p class="eyebrow"><span class="eyebrow-line"></span> TU COMPAÑERO DE ENTRENAMIENTO</p>
-            <h1 id="page-title">Un día más.<br><span>Un poco más fuerte.</span></h1>
-            <p class="hero-copy">Apunta tus series. La próxima vez, sabrás exactamente dónde lo dejaste.</p>
-          </div>
-          <div class="hero-decoration" aria-hidden="true">
-            <span class="hero-ring ring-one"></span><span class="hero-ring ring-two"></span>
-            <span class="hero-badge">HOY<br><strong id="today-label"></strong></span>
-          </div>
-        </section>
-
-        <section class="workout-section" aria-labelledby="exercise-heading">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow section-eyebrow">TU RUTINA</p>
-              <h2 id="exercise-heading">Ejercicios <span id="exercise-count" class="count-badge">0</span></h2>
-            </div>
-          </div>
-          <div class="toolbar">
-            <label class="search-box">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
-              <span class="visually-hidden">Buscar ejercicio</span>
-              <input id="search-input" type="search" placeholder="Buscar ejercicio..." autocomplete="off">
-            </label>
-            <div class="filters" role="group" aria-label="Filtrar ejercicios">
-              <button type="button" class="filter-button is-active" data-filter="all" aria-pressed="true">Todos</button>
-              <button type="button" class="filter-button" data-filter="machine" aria-pressed="false">Máquinas</button>
-              <button type="button" class="filter-button" data-filter="exercise" aria-pressed="false">Libres</button>
-            </div>
-          </div>
-          <p id="app-message" class="app-message" role="status" aria-live="polite" hidden></p>
-          <div id="exercise-list" class="exercise-list" aria-live="polite"></div>
-          <p id="empty-state" class="empty-state" hidden>No hay ejercicios que coincidan con tu búsqueda.</p>
-        </section>
-      </main>
-      <footer class="footer"><span>GYMMY</span><span>Tus datos se quedan en este dispositivo.</span></footer>
-    </div>
-
-    <dialog id="history-dialog" class="history-dialog" aria-labelledby="history-title">
-      <div class="dialog-header">
-        <div><p class="eyebrow section-eyebrow">CADA REPETICIÓN CUENTA</p><h2 id="history-title">Tu progreso</h2></div>
-        <button id="close-history" class="close-button" type="button" aria-label="Cerrar historial">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
-        </button>
-      </div>
-      <label class="history-filter-label" for="history-filter">Ver historial</label>
-      <select id="history-filter" class="history-filter"><option value="all">Todos los ejercicios</option></select>
-      <div id="history-content" class="history-content"></div>
-    </dialog>
-
-    <div id="update-banner" class="update-banner" hidden>
-      <span>Hay una actualización lista.</span>
-      <button id="update-button" type="button">Actualizar ahora</button>
-      <button id="dismiss-update" class="dismiss-update" type="button" aria-label="Descartar aviso">×</button>
-    </div>
-    <script type="module" src="./src/main.js"></script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
