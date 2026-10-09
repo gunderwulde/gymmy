@@ -13,10 +13,8 @@ Cabecera de la aplicación. Se corresponde con la captura de referencia del dise
 
 **Bloque de bienvenida (hero)**
 
-- Texto superior «TU COMPAÑERO DE ENTRENAMIENTO» con línea decorativa.
-- Título «Un día más. / Un poco más fuerte.» (segunda línea en color de acento).
-- Texto de apoyo: «Apunta tus series. La próxima vez, sabrás exactamente dónde lo dejaste.»
-- Insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`), alineada arriba a la derecha con margen y sin círculos decorativos detrás para mantener despejada el área del texto. Es `aria-hidden`.
+- Disposición compacta: el título «Un día más. / Un poco más fuerte.» (segunda línea en color de acento) y el texto de apoyo «Apunta tus series. La próxima vez, sabrás exactamente dónde lo dejaste.» quedan a la izquierda.
+- La insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`) queda arriba a la derecha, con margen, sin círculos decorativos y sin solaparse con el texto. El conjunto de título y texto de apoyo no supera la altura de la insignia. Es `aria-hidden`.
 
 ## Interfaz
 

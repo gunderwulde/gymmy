@@ -57,9 +57,6 @@ const today = computed(() =>
 
     <section class="hero" aria-labelledby="page-title">
       <div class="hero-content">
-        <p class="eyebrow">
-          <span class="eyebrow-line" /> TU COMPAÑERO DE ENTRENAMIENTO
-        </p>
         <h1 id="page-title">
           Un día más.<br /><span>Un poco más fuerte.</span>
         </h1>
@@ -174,15 +171,17 @@ const today = computed(() =>
 }
 
 .hero {
-  min-height: 294px;
-  margin: 34px 0 53px;
-  padding: 46px 54px;
+  min-height: 0;
+  margin: 14px 0 18px;
+  padding: 14px 18px;
   position: relative;
   overflow: hidden;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
   align-items: center;
+  gap: 12px;
   border: 1px solid #ffffff0b;
-  border-radius: 24px;
+  border-radius: 19px;
   background: radial-gradient(
     ellipse at 87% 45%,
     #34452a 0,
@@ -192,28 +191,11 @@ const today = computed(() =>
   );
 }
 
-.eyebrow {
-  margin: 0 0 17px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.6px;
-}
-
-.eyebrow-line {
-  width: 17px;
-  height: 1px;
-  background: var(--accent);
-}
-
 h1 {
-  margin: 0 0 13px;
-  font-size: clamp(32px, 5vw, 47px);
-  line-height: 1.08;
-  letter-spacing: -1.9px;
+  margin: 0 0 3px;
+  font-size: 28px;
+  line-height: 1.04;
+  letter-spacing: -1px;
 }
 
 h1 span {
@@ -224,27 +206,25 @@ h1 span {
   max-width: 405px;
   margin: 0;
   color: #b0b9b1;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.hero-decoration {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 88px;
-  height: 88px;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .hero-content {
+  min-width: 0;
   max-width: 405px;
 }
 
-.hero-badge {
-  position: absolute;
-  inset: 0;
+.hero-decoration {
   width: 88px;
   height: 88px;
+  justify-self: end;
+  align-self: start;
+}
+
+.hero-badge {
+  width: 100%;
+  height: 100%;
   display: grid;
   align-content: center;
   justify-items: center;
@@ -252,46 +232,38 @@ h1 span {
   background: var(--accent);
   color: #182213;
   font-size: 9px;
-  line-height: 1.5;
-  letter-spacing: 1.4px;
+  line-height: 1.3;
+  letter-spacing: 1px;
   font-weight: 800;
 }
 
 .hero-badge strong {
-  font-size: 16px;
+  font-size: 14px;
   letter-spacing: 0;
 }
 
 @media (max-width: 760px) {
   .hero {
-    min-height: 270px;
-    margin: 23px 0 38px;
-    padding: 32px 28px;
+    margin: 10px 0 14px;
+    padding: 12px 14px;
+    grid-template-columns: minmax(0, 1fr) 68px;
+    gap: 8px;
+    border-radius: 16px;
   }
 
   .hero-decoration {
-    top: 12px;
-    right: 12px;
     width: 68px;
     height: 68px;
   }
 
-  .hero-badge {
-    width: 68px;
-    height: 68px;
-    font-size: 7px;
-  }
-
-  .hero-badge strong {
-    font-size: 12px;
-  }
-
-  .hero-content {
-    max-width: calc(100% - 84px);
+  h1 {
+    font-size: 18px;
+    letter-spacing: -0.5px;
   }
 
   .hero-copy {
-    max-width: 330px;
+    font-size: 9px;
+    line-height: 1.15;
   }
 }
 
@@ -324,38 +296,12 @@ h1 span {
     height: 16px;
   }
 
-  .hero {
-    min-height: 250px;
-    margin-top: 17px;
-    padding: 27px 21px;
-    border-radius: 19px;
-  }
-
   h1 {
-    font-size: 34px;
+    font-size: 17px;
   }
 
   .hero-copy {
-    max-width: 285px;
-    font-size: 13px;
-  }
-
-  .hero-decoration {
-    top: 8px;
-    right: 8px;
-    width: 52px;
-    height: 52px;
-  }
-
-  .hero-badge {
-    width: 52px;
-    height: 52px;
-    font-size: 6px;
-    letter-spacing: 0.8px;
-  }
-
-  .hero-badge strong {
-    font-size: 10px;
+    font-size: 8px;
   }
 }
 
@@ -365,77 +311,28 @@ h1 span {
   }
 
   .hero {
-    min-height: 150px;
     margin: 8px 0 10px;
-    padding: 14px 20px;
-  }
-
-  .eyebrow {
-    margin-bottom: 8px;
-    font-size: 8px;
-  }
-
-  h1 {
-    margin-bottom: 6px;
-    font-size: 26px;
-  }
-
-  .hero-copy {
-    font-size: 10px;
-    line-height: 1.35;
-  }
-
-  .hero-decoration {
-    top: 8px;
-    right: 8px;
-    width: 62px;
-    height: 62px;
-  }
-
-  .hero-badge {
-    width: 62px;
-    height: 62px;
-    font-size: 7px;
-  }
-
-  .hero-badge strong {
-    font-size: 12px;
+    padding-block: 10px;
   }
 }
 
 @media (max-height: 600px) {
-  .hero {
-    min-height: 125px;
-    margin: 5px 0 7px;
-    padding: 10px 14px;
+  .topbar {
+    height: 48px;
   }
 
-  .eyebrow {
-    margin-bottom: 5px;
+  .hero {
+    margin: 5px 0 7px;
+    padding-block: 8px;
+    grid-template-columns: minmax(0, 1fr) 60px;
   }
 
   h1 {
-    margin-bottom: 4px;
-    font-size: 22px;
+    font-size: 16px;
   }
 
   .hero-copy {
-    font-size: 10px;
-    line-height: 1.2;
-  }
-
-  .hero-decoration {
-    width: 54px;
-    height: 54px;
-  }
-
-  .hero-badge {
-    width: 54px;
-    height: 54px;
-  }
-
-  .hero-badge strong {
-    font-size: 11px;
+    font-size: 8px;
   }
 }
 
@@ -445,39 +342,25 @@ h1 span {
   }
 
   .hero {
-    min-height: 92px;
     margin: 3px 0 4px;
-    padding: 8px 12px;
-  }
-
-  .eyebrow {
-    margin-bottom: 4px;
+    padding: 6px 10px;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 6px;
   }
 
   h1 {
-    margin-bottom: 0;
-    font-size: 20px;
+    margin-bottom: 2px;
+    font-size: 15px;
   }
 
   .hero-copy {
-    display: none;
+    font-size: 7px;
+    line-height: 1.1;
   }
 
   .hero-decoration {
-    top: 6px;
-    right: 6px;
-    width: 48px;
-    height: 48px;
-  }
-
-  .hero-badge {
-    width: 48px;
-    height: 48px;
-    font-size: 6px;
-  }
-
-  .hero-badge strong {
-    font-size: 10px;
+    width: 52px;
+    height: 52px;
   }
 }
 </style>
