@@ -21,6 +21,12 @@ Eres el desarrollador de Gymmy, una PWA offline-first en español. Responde en e
 - Verifica el modo sin conexión de verdad (tras la primera carga, activa «Sin conexión» en las herramientas de desarrollo). No afirmes que funciona offline sin haberlo comprobado.
 - Cuando cambie un recurso servido, incrementa la versión de caché o equivalente.
 
+## Interfaz móvil y viewport
+
+- La aplicación está diseñada para ejecutarse principalmente en móviles y debe ocupar el área visible de la aplicación.
+- No se debe permitir ampliar la interfaz mediante zoom ni desplazar la página o el documento fuera del área de la aplicación.
+- El desplazamiento debe limitarse a las zonas internas indicadas en el README más cercano; no se debe habilitar scroll en el contenedor raíz ni en el documento.
+
 ## Forma de trabajar
 
 - Si el usuario pide solo ciertos archivos, limítate a ellos y no generes el resto.

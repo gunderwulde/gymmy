@@ -12,6 +12,12 @@ Sección «Ejercicios»: encabezado con contador, barra de búsqueda y filtros, 
 - Muestra el mensaje del store (guardado correcto o error), el estado de carga y el estado vacío («No hay ejercicios que coincidan con tu búsqueda.»).
 - Es contenedor: lee el catálogo ordenado del store (`sortedCatalog`) y pasa a cada tarjeta lo que necesita.
 
+## Área de desplazamiento
+
+- La sección ocupa el espacio central disponible entre el header y el footer de `App.vue`; no desplaza esos elementos.
+- Con resultados, solo la cuadrícula `.exercise-list` tiene scroll vertical. El encabezado, la búsqueda, los filtros y los mensajes permanecen visibles.
+- El gesto de desplazamiento de la lista no debe propagarse a la página ni permitir scroll fuera del área de la aplicación.
+
 ## Clasificación
 
 Los filtros son **Todos**, **Superiores**, **Inferiores** y **Cardio** (sustituyen a «Todos / Máquinas / Libres»).

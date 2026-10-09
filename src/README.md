@@ -13,6 +13,12 @@ Código de la aplicación. Complementa al [README.md](../README.md) raíz; en ca
 
 `App.vue` conecta los componentes entre sí (por ejemplo, el evento de «Progreso» de `AppHeader` abre `HistoryDialog`) y arranca la carga inicial del store. No importa componentes de ejercicio directamente: eso lo hace `ExerciseList`.
 
+## Distribución móvil
+
+- El header (`AppHeader`) y el footer de `App.vue` son inamovibles: permanecen anclados a los bordes superior e inferior del área visible y no se desplazan al recorrer los ejercicios.
+- `ExerciseList` ocupa la zona central disponible y es la zona con scroll. El desplazamiento de la lista no debe mover el header ni el footer ni provocar scroll fuera del área de la aplicación.
+- La interfaz está pensada para móvil; no se debe permitir ampliar la aplicación mediante zoom.
+
 ## Estructura
 
 - `components/`: un directorio por componente. Ver [components/README.md](./components/README.md).

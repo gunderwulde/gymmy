@@ -111,15 +111,31 @@ function errorMessage(error: unknown): string {
 <style scoped>
 .app-shell {
   width: min(1040px, 100% - 48px);
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   margin-inline: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+main {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .footer {
+  min-height: 0;
+  margin: 12px 0 10px;
+  padding-top: 10px;
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin: 46px 0 25px;
-  padding-top: 16px;
   border-top: 1px solid #ffffff12;
   color: #77837a;
   font-size: 10px;
@@ -144,7 +160,8 @@ function errorMessage(error: unknown): string {
   }
 
   .footer {
-    margin-top: 35px;
+    margin: 8px 0;
+    padding-top: 8px;
     font-size: 9px;
   }
 }

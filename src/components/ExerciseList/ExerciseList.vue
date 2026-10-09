@@ -193,7 +193,11 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
     <p v-if="!store.ready" class="empty-state" role="status">
       Cargando ejercicios…
     </p>
-    <div v-else class="exercise-list" aria-live="polite">
+    <div
+      v-else-if="filteredExercises.length > 0"
+      class="exercise-list"
+      aria-live="polite"
+    >
       <article
         v-for="exercise in filteredExercises"
         :id="`exercise-${exercise.id}`"
@@ -257,7 +261,7 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
         />
       </article>
     </div>
-    <p v-if="store.ready && filteredExercises.length === 0" class="empty-state">
+    <p v-else class="empty-state">
       No hay ejercicios que coincidan con tu búsqueda.
     </p>
   </section>
@@ -265,10 +269,16 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
 
 <style scoped>
 .workout-section {
+  height: 100%;
+  min-height: 0;
   padding: 0 5px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .section-heading {
+  flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: end;
@@ -300,6 +310,7 @@ h2 {
 }
 
 .toolbar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -370,9 +381,16 @@ h2 {
 }
 
 .exercise-list {
+  flex: 1 1 0;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .exercise-card {
@@ -414,8 +432,13 @@ h2 {
 }
 
 .empty-state {
+  flex: 1 1 0;
+  min-height: 0;
   margin: 0;
   padding: 28px;
+  display: grid;
+  place-items: center;
+  overflow: auto;
   border: 1px dashed var(--line);
   border-radius: 14px;
   color: var(--muted);
@@ -465,6 +488,58 @@ h2 {
     flex: 1;
     padding-inline: 5px;
     font-size: 11px;
+  }
+}
+
+@media (max-height: 600px) {
+  .section-heading {
+    margin-bottom: 8px;
+  }
+
+  .section-eyebrow {
+    margin-bottom: 3px;
+    font-size: 8px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .toolbar {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .search-box {
+    height: 36px;
+  }
+
+  .filters {
+    padding: 2px;
+  }
+
+  .filter-button {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+}
+
+@media (max-height: 420px) {
+  .section-heading {
+    margin-bottom: 4px;
+  }
+
+  .toolbar {
+    gap: 5px;
+    margin-bottom: 4px;
+  }
+
+  .search-box {
+    height: 32px;
+  }
+
+  .filter-button {
+    padding: 3px 6px;
   }
 }
 </style>

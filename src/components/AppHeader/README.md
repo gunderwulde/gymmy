@@ -16,7 +16,7 @@ Cabecera de la aplicación. Se corresponde con la captura de referencia del dise
 - Texto superior «TU COMPAÑERO DE ENTRENAMIENTO» con línea decorativa.
 - Título «Un día más. / Un poco más fuerte.» (segunda línea en color de acento).
 - Texto de apoyo: «Apunta tus series. La próxima vez, sabrás exactamente dónde lo dejaste.»
-- Decoración de círculos concéntricos con insignia «HOY» y la fecha actual en formato corto (p. ej. `09 OCT`). La decoración es `aria-hidden`.
+- Insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`), alineada arriba a la derecha con margen y sin círculos decorativos detrás para mantener despejada el área del texto. Es `aria-hidden`.
 
 ## Interfaz
 

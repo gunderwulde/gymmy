@@ -56,7 +56,7 @@ const today = computed(() =>
     </div>
 
     <section class="hero" aria-labelledby="page-title">
-      <div>
+      <div class="hero-content">
         <p class="eyebrow">
           <span class="eyebrow-line" /> TU COMPAÑERO DE ENTRENAMIENTO
         </p>
@@ -69,8 +69,6 @@ const today = computed(() =>
         </p>
       </div>
       <div class="hero-decoration" aria-hidden="true">
-        <span class="hero-ring ring-one" />
-        <span class="hero-ring ring-two" />
         <span class="hero-badge"
           >HOY<br /><strong>{{ today }}</strong></span
         >
@@ -232,35 +230,19 @@ h1 span {
 
 .hero-decoration {
   position: absolute;
-  width: 310px;
-  height: 260px;
-  right: 20px;
   top: 16px;
-  opacity: 0.9;
+  right: 16px;
+  width: 88px;
+  height: 88px;
 }
 
-.hero-ring {
-  position: absolute;
-  width: 215px;
-  height: 215px;
-  top: 15px;
-  right: 28px;
-  border: 1px solid #c3f36b35;
-  border-radius: 50%;
-}
-
-.ring-two {
-  width: 165px;
-  height: 165px;
-  top: 40px;
-  right: 53px;
-  border-color: #c3f36b65;
+.hero-content {
+  max-width: 405px;
 }
 
 .hero-badge {
   position: absolute;
-  top: 93px;
-  right: 91px;
+  inset: 0;
   width: 88px;
   height: 88px;
   display: grid;
@@ -273,7 +255,6 @@ h1 span {
   line-height: 1.5;
   letter-spacing: 1.4px;
   font-weight: 800;
-  transform: rotate(-10deg);
 }
 
 .hero-badge strong {
@@ -289,8 +270,24 @@ h1 span {
   }
 
   .hero-decoration {
-    right: -106px;
-    opacity: 0.42;
+    top: 12px;
+    right: 12px;
+    width: 68px;
+    height: 68px;
+  }
+
+  .hero-badge {
+    width: 68px;
+    height: 68px;
+    font-size: 7px;
+  }
+
+  .hero-badge strong {
+    font-size: 12px;
+  }
+
+  .hero-content {
+    max-width: calc(100% - 84px);
   }
 
   .hero-copy {
@@ -344,7 +341,143 @@ h1 span {
   }
 
   .hero-decoration {
-    right: -166px;
+    top: 8px;
+    right: 8px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .hero-badge {
+    width: 52px;
+    height: 52px;
+    font-size: 6px;
+    letter-spacing: 0.8px;
+  }
+
+  .hero-badge strong {
+    font-size: 10px;
+  }
+}
+
+@media (max-height: 740px) {
+  .topbar {
+    height: 52px;
+  }
+
+  .hero {
+    min-height: 150px;
+    margin: 8px 0 10px;
+    padding: 14px 20px;
+  }
+
+  .eyebrow {
+    margin-bottom: 8px;
+    font-size: 8px;
+  }
+
+  h1 {
+    margin-bottom: 6px;
+    font-size: 26px;
+  }
+
+  .hero-copy {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .hero-decoration {
+    top: 8px;
+    right: 8px;
+    width: 62px;
+    height: 62px;
+  }
+
+  .hero-badge {
+    width: 62px;
+    height: 62px;
+    font-size: 7px;
+  }
+
+  .hero-badge strong {
+    font-size: 12px;
+  }
+}
+
+@media (max-height: 600px) {
+  .hero {
+    min-height: 125px;
+    margin: 5px 0 7px;
+    padding: 10px 14px;
+  }
+
+  .eyebrow {
+    margin-bottom: 5px;
+  }
+
+  h1 {
+    margin-bottom: 4px;
+    font-size: 22px;
+  }
+
+  .hero-copy {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .hero-decoration {
+    width: 54px;
+    height: 54px;
+  }
+
+  .hero-badge {
+    width: 54px;
+    height: 54px;
+  }
+
+  .hero-badge strong {
+    font-size: 11px;
+  }
+}
+
+@media (max-height: 420px) {
+  .topbar {
+    height: 44px;
+  }
+
+  .hero {
+    min-height: 92px;
+    margin: 3px 0 4px;
+    padding: 8px 12px;
+  }
+
+  .eyebrow {
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    margin-bottom: 0;
+    font-size: 20px;
+  }
+
+  .hero-copy {
+    display: none;
+  }
+
+  .hero-decoration {
+    top: 6px;
+    right: 6px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .hero-badge {
+    width: 48px;
+    height: 48px;
+    font-size: 6px;
+  }
+
+  .hero-badge strong {
+    font-size: 10px;
   }
 }
 </style>
