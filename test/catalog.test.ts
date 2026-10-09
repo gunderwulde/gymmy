@@ -23,7 +23,9 @@ describe("catálogo", () => {
 
   it("valida entradas e ilustraciones locales existentes sin archivos sobrantes", async () => {
     expect(validateCatalog(catalog)).toEqual(catalog);
-    const usedImages = new Set(catalog.map((exercise) => `${exercise.id}.svg`));
+    const usedImages = new Set(
+      catalog.map((exercise) => exercise.image.split("/").at(-1)),
+    );
     const imageFiles = await readdir(
       new URL("../assets/exercises/", import.meta.url),
     );
@@ -35,24 +37,34 @@ describe("catálogo", () => {
     }
   });
 
-  it("rechaza ids duplicados, imágenes remotas y campos de tiempo incompatibles", () => {
+  it("valida las variables y rechaza imágenes remotas o esquemas incompatibles", () => {
     expect(() => validateCatalog([catalog[0], catalog[0]])).toThrow(
       /duplicado/,
     );
     expect(() =>
       validateCatalog([
-        { ...catalog[0], image: "https://example.com/image.svg" },
+        { ...catalog[0], image: "https://example.com/image.webp" },
       ]),
     ).toThrow(/inválida/);
     const treadmill = catalog.find(
       (exercise) => exercise.id === "cinta-correr",
     )!;
-    expect(() => validateCatalog([{ ...treadmill, defaultWeight: 0 }])).toThrow(
-      /no debe definir peso/,
-    );
     expect(() =>
-      validateCatalog([{ ...catalog[0], defaultReps: undefined }]),
-    ).toThrow(/valores iniciales/);
+      validateCatalog([{ ...treadmill, v2: catalog[0].v1 }]),
+    ).toThrow(/solo puede definir v1/);
+    expect(() =>
+      validateCatalog([
+        { ...catalog[0], v2: { var: "peso", txt: "Duplicado", default: 2 } },
+      ]),
+    ).toThrow(/variables.*inválidas/);
+    expect(() => validateCatalog([{ ...catalog[0], v1: undefined }])).toThrow(
+      /variables/,
+    );
+    expect(
+      validateCatalog([
+        { ...treadmill, image: "assets/exercises/cinta-correr.webp" },
+      ]),
+    ).toHaveLength(1);
   });
 
   it("selecciona la última entrada y ordena las actividades recientes primero", () => {

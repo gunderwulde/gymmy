@@ -14,14 +14,14 @@ Reglas comunes para todos los componentes de la interfaz. Cada componente tiene 
 
 ## Componentes
 
-| Componente                                           | Qué es                                                   |
-| ---------------------------------------------------- | -------------------------------------------------------- |
-| [`AppHeader`](./AppHeader/README.md)                 | Cabecera: barra superior y bloque de bienvenida.         |
-| [`ExerciseList`](./ExerciseList/README.md)           | Búsqueda, filtros y lista de ejercicios.                 |
-| [`ExerciseCardSets`](./ExerciseCardSets/README.md)   | Ejercicio no temporizado (peso, repeticiones y «Hecho»). |
-| [`ExerciseCardTimed`](./ExerciseCardTimed/README.md) | Ejercicio temporizado (cronómetro y controles).          |
-| [`HistoryDialog`](./HistoryDialog/README.md)         | Ventana emergente con el historial de progreso.          |
-| [`UpdateBanner`](./UpdateBanner/README.md)           | Aviso de actualización disponible de la PWA.             |
+| Componente                                           | Qué es                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------ |
+| [`AppHeader`](./AppHeader/README.md)                 | Cabecera: barra superior y bloque de bienvenida.             |
+| [`ExerciseList`](./ExerciseList/README.md)           | Búsqueda, filtros y lista de ejercicios.                     |
+| [`ExerciseCardSets`](./ExerciseCardSets/README.md)   | La tarjeta abre el popup para editar y registrar series.     |
+| [`ExerciseCardTimed`](./ExerciseCardTimed/README.md) | Cronómetro y controles; la tarjeta abre el popup de edición. |
+| [`HistoryDialog`](./HistoryDialog/README.md)         | Ventana emergente con el historial de progreso.              |
+| [`UpdateBanner`](./UpdateBanner/README.md)           | Aviso de actualización disponible de la PWA.                 |
 
 ## Reglas
 

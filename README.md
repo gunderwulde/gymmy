@@ -6,12 +6,13 @@ Publicada en <https://gunderwulde.github.io/gymmy/>.
 
 ## Funcionalidad
 
-- Máquinas y ejercicios típicos en una lista desplazable. Cada elemento incluye nombre e ilustración a la izquierda. Los ejercicios de fuerza ofrecen peso y repeticiones editables más «Hecho»; las actividades con `tracking: "time"` ofrecen cronómetro y controles de actividad.
-- Al pulsar «Hecho» se añade al historial una entrada con id del ejercicio, peso (kg), repeticiones y fecha y hora ISO. Pulsar varias veces genera varias entradas (series); nunca se sobrescriben las anteriores.
-- Cada elemento actúa como recordatorio: peso y repeticiones se inicializan con los de la última entrada de ese ejercicio y se muestra un texto como «Última vez: 05/10/2026 · 40 kg × 10». Sin historial, se usan los valores por defecto del catálogo.
+- Máquinas y ejercicios típicos en una lista desplazable. Cada elemento incluye nombre e ilustración a la izquierda. La tarjeta no temporizada completa actúa como control para abrir un popup; allí se editan las variables, mostradas en una sola línea en la tarjeta, y se registra la serie con «Hecho».
+- Las tarjetas temporizadas muestran el cronómetro y los datos de la actividad como texto. «Iniciar» está en la tarjeta; al pulsar la tarjeta fuera de sus botones se abre el popup para editar la variable complementaria. En marcha, la tarjeta ofrece «Pausar» y «Finalizar»; en pausa ofrece «Reanudar» y «Finalizar».
+- Al pulsar «Hecho» se añade al historial una entrada por ejercicio y fecha y hora ISO, con los valores identificados por sus claves estables. Las entradas anteriores no se sobrescriben.
+- Cada variable se inicializa con el valor editado guardado; si no existe, usa el último valor registrado para su clave y, en su defecto, el `default` del catálogo. El recordatorio muestra los valores con sus etiquetas y fecha.
 - El catálogo se ordena por última fecha de uso, primero la actividad más reciente; las que no tienen historial quedan al final en el orden original. Se reordena tras cada registro completado.
-- Un botón de progreso abre una ventana emergente (`<dialog>`) con el historial agrupado por día, del más reciente al más antiguo, con filtro por ejercicio y peso y repeticiones por fecha.
-- Las actividades temporizadas (cinta de correr, bicicleta estática) muestran `HH:MM:SS` y ofrecen «Iniciar», «Pausar»/«Continuar» y «Terminar». El tiempo se calcula con timestamps de reloj (`Date.now()` en milisegundos), no contando intervalos: mientras está en marcha se conserva el timestamp de inicio y se muestra el tiempo acumulado más la diferencia hasta ahora. Así, al reanudar la app después de que el móvil haya quedado en reposo, el tiempo transcurrido se actualiza correctamente. Al pausar, se suma el tramo transcurrido al acumulado y se guarda; al continuar, se toma un nuevo timestamp de inicio sin perder lo acumulado. Al terminar, se suma el último tramo y se guarda la duración. Solo puede haber una actividad temporizada en marcha a la vez.
+- Un botón de progreso abre una ventana emergente (`<dialog>`) con el historial agrupado por día, del más reciente al más antiguo, con filtro por ejercicio y los valores registrados con sus etiquetas.
+- Las actividades temporizadas (cinta de correr, bicicleta estática) muestran `HH:MM:SS`. El tiempo se calcula con timestamps de reloj (`Date.now()` en milisegundos), no contando intervalos: mientras está en marcha se conserva el timestamp de inicio y se muestra el tiempo acumulado más la diferencia hasta ahora. Así, al reanudar la app después de que el móvil haya quedado en reposo, el tiempo transcurrido se actualiza correctamente. Al pausar, se suma el tramo transcurrido al acumulado y se guarda; al reanudar, se toma un nuevo timestamp de inicio sin perder lo acumulado. Al finalizar, se suma el último tramo y se guarda la duración. La cinta registra inclinación en porcentaje y la bicicleta resistencia. Solo puede haber una actividad temporizada en marcha a la vez.
 - Las máquinas se distinguen visualmente de los ejercicios libres (etiqueta en la tarjeta). La lista se filtra por zona (Todos, Superiores, Inferiores y Cardio) y se puede buscar por nombre o grupo muscular.
 
 ## Stack y estructura
@@ -41,20 +42,23 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
   "tracking": "sets",
   "muscleGroup": "chest",
   "image": "assets/exercises/press-banca.svg",
-  "defaultWeight": 20,
-  "defaultReps": 10
+  "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+  "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
 }
 ```
 
-- `type` es `machine` o `exercise`; `tracking` es opcional: `sets` (por defecto) o `time`.
-- Las actividades temporizadas declaran `"tracking": "time"` y omiten `defaultWeight` y `defaultReps`; las demás requieren ambos.
+- `type` es `machine` o `exercise`; `tracking` es opcional: `sets` (por defecto) o `time`. `image` puede apuntar a una imagen local `.svg` o `.webp`.
+- Cada variable tiene la forma `{ "var": "peso", "txt": "Peso (kg)", "default": 20 }`: `var` es su clave estable para persistencia, `txt` su etiqueta visible en español y `default` un número inicial no negativo.
+- Las actividades no temporizadas pueden definir `v1`, `v2` y `v3` (de una a tres variables). Las claves `var` no se repiten dentro de un mismo ejercicio. Las temporizadas pueden definir solo `v1` como dato complementario al cronómetro, o no definirla.
+- Los ejercicios de fuerza ya incluyen `v1` para peso y `v2` para repeticiones. La cinta incluye `v1` inclinación (%), inicial 0; la bicicleta estática incluye `v1` resistencia, inicial 1.
+- Los ejercicios no temporizados requieren de una a tres variables consecutivas (`v1`, `v2`, `v3`). Las temporizadas pueden definir solo `v1` como dato complementario o no definir ninguna variable. La clave `repeticiones` exige un valor inicial entero de al menos 1; los demás valores admiten decimales no negativos.
 - Los `id` son únicos, estables y en kebab-case; nunca se renombran, porque el historial depende de ellos. Los textos visibles van en español.
-- Hay una ilustración SVG por entrada con el mismo nombre que su `id`: mismo tamaño y viewBox, trazo simple, paleta común, ligera y sin referencias externas. Cada `image` apunta a un archivo existente y no sobra ninguno.
+- Hay una ilustración local por entrada. Las imágenes pueden ser SVG o WebP; cada `image` apunta a un archivo existente y no sobra ninguno. `curl-piernas.webp` y `presa-piernas.webp` ilustran Curl femoral y Prensa de piernas; también se añadieron las máquinas de gemelos y extensión de piernas.
 - El catálogo se valida al cargarlo (campos obligatorios, tipos, `id` únicos) y, si es inválido, se muestra un error visible.
 
 ## Persistencia
 
-- Valores editados, historial y sesión del cronómetro se guardan en IndexedDB con Dexie; los registros se escriben mediante transacciones. La sesión temporizada persiste el id de la actividad, los milisegundos activos acumulados y el timestamp del tramo en marcha; cada pausa consolida el tramo antes de iniciar otro al continuar. Se solicita `navigator.storage.persist()`.
+- Valores editados, historial y sesión del cronómetro se guardan en IndexedDB con Dexie; los registros se escriben mediante transacciones. Los valores se guardan en mapas por clave `var`; las entradas temporizadas guardan la duración y, cuando exista, el valor de `v1`. La migración convierte automáticamente el historial y los valores antiguos de peso/repeticiones en las claves `peso` y `repeticiones`, conservando las entradas. La sesión temporizada persiste el id de la actividad, los milisegundos activos acumulados y el timestamp del tramo en marcha; cada pausa consolida el tramo antes de iniciar otro al continuar. Se solicita `navigator.storage.persist()`.
 - El historial referencia los ejercicios por `id`. Si un `id` ya no existe en el catálogo, la entrada se conserva y se muestra con un nombre genérico.
 - Si los datos guardados están corruptos, no se borran ni sobrescriben en silencio: se avisa al usuario y se conserva una copia de seguridad.
 - El catálogo está separado del estado del usuario; actualizar el catálogo o la app nunca borra historial ni valores editados.
@@ -71,7 +75,8 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
 ## Interfaz y accesibilidad
 
 - Diseño adaptable y táctil, con controles legibles en pantallas pequeñas.
-- Peso (`inputmode="decimal"`, paso 0,5 kg, mínimo 0) y repeticiones (`inputmode="numeric"`, entero ≥ 1) editables por entrada, con etiquetas accesibles. «Hecho» no registra valores vacíos, negativos ni no numéricos y muestra el error junto al campo. Se acepta la coma decimal.
+- Cada variable del catálogo se muestra como un campo numérico con `txt` como etiqueta dentro del popup de la tarjeta; los valores vacíos, negativos o no numéricos no se guardan, y se acepta la coma decimal. Repeticiones es un entero ≥ 1.
+- Los diálogos de las tarjetas se abren y cierran con teclado, tienen un título accesible y devuelven el foco a la tarjeta que los abrió. Los botones propios de las tarjetas (progreso, iniciar, pausar, reanudar y finalizar) mantienen su acción y no abren el popup al activarse.
 - Ilustraciones con `loading="lazy"`, dimensiones fijas y a la izquierda del nombre, con texto alternativo útil; si falta una imagen se muestra un reemplazo local.
 - El popup de progreso se abre y cierra con teclado, tiene título accesible y devuelve el foco al control que lo abrió.
 - El resultado de guardar un registro y los errores se comunican de forma visible.

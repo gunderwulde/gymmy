@@ -22,12 +22,14 @@ describe("persistencia IndexedDB", () => {
   });
 
   it("valida y guarda valores e historial en tablas IndexedDB", async () => {
-    const value = { exerciseId: "press-banca", weight: 30.5, reps: 8 };
+    const value = {
+      exerciseId: "press-banca",
+      values: { peso: 30.5, repeticiones: 8 },
+    };
     const entry = {
       exerciseId: "press-banca",
       mode: "sets" as const,
-      weight: 30.5,
-      reps: 8,
+      values: { peso: 30.5, repeticiones: 8 },
       date: "2026-01-02T10:00:00.000Z",
     };
     expect(isExerciseValue(value)).toBe(true);
@@ -78,6 +80,62 @@ describe("persistencia IndexedDB", () => {
         startedAt: null,
       });
       expect(isTimerSession(session)).toBe(true);
+    } finally {
+      await upgradedDatabase.delete();
+    }
+  });
+
+  it("migra los valores e historiales de peso y repeticiones a variables", async () => {
+    const name = "gymmy-variable-data-migration";
+    const legacyDatabase = new Dexie(name);
+    legacyDatabase.version(2).stores({
+      exerciseValues: "&exerciseId",
+      history: "++id, exerciseId, date",
+      sessions: "&id",
+      backups: "++id, createdAt",
+    });
+    await legacyDatabase.open();
+    await legacyDatabase.table("exerciseValues").put({
+      exerciseId: "press-banca",
+      weight: 35,
+      reps: 8,
+    });
+    await legacyDatabase.table("history").add({
+      exerciseId: "press-banca",
+      mode: "sets",
+      weight: 35,
+      reps: 8,
+      date: "2026-01-02T10:00:00.000Z",
+    });
+    await legacyDatabase.table("history").add({
+      exerciseId: "bicicleta-estatica",
+      mode: "time",
+      durationSeconds: 900,
+      date: "2026-01-02T11:00:00.000Z",
+    });
+    legacyDatabase.close();
+
+    const upgradedDatabase = new GymmyDatabase(name);
+    try {
+      await upgradedDatabase.open();
+      expect(await upgradedDatabase.exerciseValues.get("press-banca")).toEqual({
+        exerciseId: "press-banca",
+        values: { peso: 35, repeticiones: 8 },
+      });
+      expect(await upgradedDatabase.history.toArray()).toEqual([
+        expect.objectContaining({
+          exerciseId: "press-banca",
+          mode: "sets",
+          values: { peso: 35, repeticiones: 8 },
+        }),
+        expect.objectContaining({
+          exerciseId: "bicicleta-estatica",
+          mode: "time",
+          durationSeconds: 900,
+        }),
+      ]);
+      const loaded = await loadWorkoutData();
+      expect(loaded.blocked).toBe(false);
     } finally {
       await upgradedDatabase.delete();
     }

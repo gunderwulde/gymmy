@@ -2,6 +2,12 @@ export type ExerciseType = "machine" | "exercise";
 export type TrackingMode = "sets" | "time";
 export type ExerciseZone = "all" | "upper" | "lower" | "cardio";
 
+export interface ExerciseVariable {
+  var: string;
+  txt: string;
+  default: number;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -9,22 +15,21 @@ export interface Exercise {
   tracking?: TrackingMode;
   muscleGroup: string;
   image: string;
-  defaultWeight?: number;
-  defaultReps?: number;
+  v1?: ExerciseVariable;
+  v2?: ExerciseVariable;
+  v3?: ExerciseVariable;
 }
 
 export interface ExerciseValue {
   exerciseId: string;
-  weight: number;
-  reps: number;
+  values: Record<string, number>;
 }
 
 export interface SetEntry {
   id?: number;
   exerciseId: string;
-  mode?: "sets";
-  weight: number;
-  reps: number;
+  mode: "sets";
+  values: Record<string, number>;
   date: string;
 }
 
@@ -33,6 +38,7 @@ export interface TimeEntry {
   exerciseId: string;
   mode: "time";
   durationSeconds: number;
+  values?: Record<string, number>;
   date: string;
 }
 

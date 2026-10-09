@@ -6,7 +6,7 @@ Ventana emergente (`<dialog>`) con el progreso. Hoy vive dentro de `App.vue`; al
 
 - Título «Tu progreso» (`aria-labelledby`).
 - Selector «Ver historial» para filtrar por ejercicio («Todos los ejercicios» por defecto).
-- Historial agrupado por día, del más reciente al más antiguo; cada entrada muestra ejercicio, hora y resultado (`40 kg × 10` o `HH:MM:SS`).
+- Historial agrupado por día, del más reciente al más antiguo; cada entrada muestra ejercicio, hora y todos los valores registrados con las etiquetas del catálogo. Las actividades temporizadas también muestran `HH:MM:SS`.
 - Entradas de ejercicios que ya no existen en el catálogo: se conservan con el nombre genérico «Ejercicio eliminado».
 - Estados vacíos distintos: sin historial, o sin registros para el ejercicio filtrado.
 

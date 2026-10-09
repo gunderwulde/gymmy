@@ -18,4 +18,4 @@ Código de la aplicación. Complementa al [README.md](../README.md) raíz; en ca
 - `components/`: un directorio por componente. Ver [components/README.md](./components/README.md).
 - `stores/`: estado compartido con Pinia (`workout`).
 - `storage/`: capa Dexie / IndexedDB.
-- `catalog.ts`, `timer.ts`, `types.ts`: dominio testeable sin DOM.
+- `catalog.ts`, `timer.ts`, `variables.ts`, `types.ts`: dominio testeable sin DOM.

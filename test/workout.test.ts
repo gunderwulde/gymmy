@@ -28,6 +28,8 @@ describe("sesiones temporizadas", () => {
   it("recupera el tramo tras el reposo y excluye la pausa al reanudar", async () => {
     store = useWorkoutStore();
     await store.load();
+    store.updateDraft("cinta-correr", "inclinacion", "2,5");
+    await store.saveDraft("cinta-correr");
     await store.startTimer("cinta-correr");
 
     const startedSession = await database.sessions.get("active");
@@ -62,7 +64,32 @@ describe("sesiones temporizadas", () => {
     expect(store.history[0]).toMatchObject({
       mode: "time",
       durationSeconds: 3_663,
+      values: { inclinacion: 2.5 },
+    });
+    expect(await database.exerciseValues.get("cinta-correr")).toEqual({
+      exerciseId: "cinta-correr",
+      values: { inclinacion: 2.5 },
     });
     expect(await database.sessions.get("active")).toBeUndefined();
+  });
+
+  it("registra las variables configuradas en ejercicios por series", async () => {
+    store = useWorkoutStore();
+    await store.load();
+    const exercise = store.catalog.find((item) => item.id === "press-banca");
+    expect(exercise).toBeDefined();
+    store.updateDraft("press-banca", "peso", "32,5");
+    store.updateDraft("press-banca", "repeticiones", "9");
+
+    await expect(store.recordSet(exercise!)).resolves.toBe(true);
+    expect(store.history[0]).toMatchObject({
+      exerciseId: "press-banca",
+      mode: "sets",
+      values: { peso: 32.5, repeticiones: 9 },
+    });
+    expect(await database.exerciseValues.get("press-banca")).toEqual({
+      exerciseId: "press-banca",
+      values: { peso: 32.5, repeticiones: 9 },
+    });
   });
 });

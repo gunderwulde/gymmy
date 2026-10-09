@@ -7,6 +7,7 @@ Sección «Ejercicios»: encabezado con contador, barra de búsqueda y filtros, 
 - Es el **único** componente que decide qué tarjeta usar para cada ejercicio:
   - `tracking: "time"` → [`ExerciseCardTimed`](../ExerciseCardTimed/README.md).
   - resto (`sets` o sin `tracking`) → [`ExerciseCardSets`](../ExerciseCardSets/README.md).
+- No fija etiquetas ni número de controles: cada tarjeta recibe su ejercicio y presenta las variables `v1`–`v3` (no temporizados) o, opcionalmente, `v1` (temporizados) del catálogo. La tarjeta de series abre su popup al pulsar su superficie; la tarjeta temporizada lo abre al pulsar fuera de sus botones. «Iniciar», pausa, reanudación y finalización son acciones de la tarjeta; la edición de `v1` temporizada queda en el popup.
 - Filtra por texto y por zona del cuerpo, y muestra el contador de resultados.
 - Muestra el mensaje del store (guardado correcto o error), el estado de carga y el estado vacío («No hay ejercicios que coincidan con tu búsqueda.»).
 - Es contenedor: lee el catálogo ordenado del store (`sortedCatalog`) y pasa a cada tarjeta lo que necesita.

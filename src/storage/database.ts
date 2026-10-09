@@ -51,10 +51,79 @@ export class GymmyDatabase extends Dexie {
             }
           }),
       );
+    this.version(3)
+      .stores({
+        exerciseValues: "&exerciseId",
+        history: "++id, exerciseId, date",
+        sessions: "&id",
+        backups: "++id, createdAt",
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("exerciseValues")
+          .toCollection()
+          .modify((value: Record<string, unknown>) => {
+            if (
+              value.values === undefined &&
+              typeof value.weight === "number" &&
+              Number.isFinite(value.weight) &&
+              value.weight >= 0 &&
+              typeof value.reps === "number" &&
+              Number.isInteger(value.reps) &&
+              value.reps >= 1
+            ) {
+              value.values = {
+                peso: value.weight,
+                repeticiones: value.reps,
+              };
+              delete value.weight;
+              delete value.reps;
+            }
+          });
+        await transaction
+          .table("history")
+          .toCollection()
+          .modify((entry: Record<string, unknown>) => {
+            if (
+              entry.mode !== "time" &&
+              entry.values === undefined &&
+              typeof entry.weight === "number" &&
+              Number.isFinite(entry.weight) &&
+              entry.weight >= 0 &&
+              typeof entry.reps === "number" &&
+              Number.isInteger(entry.reps) &&
+              entry.reps >= 1
+            ) {
+              entry.mode = "sets";
+              entry.values = {
+                peso: entry.weight,
+                repeticiones: entry.reps,
+              };
+              delete entry.weight;
+              delete entry.reps;
+            }
+          });
+      });
   }
 }
 
 export const database = new GymmyDatabase();
+
+function isVariableValues(value: unknown, allowEmpty = false): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const entries = Object.entries(value);
+  return (
+    (allowEmpty || entries.length > 0) &&
+    entries.every(
+      ([key, number]) =>
+        /^[a-z][a-z0-9_-]*$/.test(key) &&
+        typeof number === "number" &&
+        Number.isFinite(number) &&
+        number >= 0 &&
+        (key !== "repeticiones" || (Number.isInteger(number) && number >= 1)),
+    )
+  );
+}
 
 export function isExerciseValue(value: unknown): value is ExerciseValue {
   if (!value || typeof value !== "object") return false;
@@ -62,10 +131,7 @@ export function isExerciseValue(value: unknown): value is ExerciseValue {
   return (
     typeof item.exerciseId === "string" &&
     item.exerciseId.length > 0 &&
-    Number.isFinite(item.weight) &&
-    (item.weight ?? -1) >= 0 &&
-    Number.isInteger(item.reps) &&
-    (item.reps ?? 0) >= 1
+    isVariableValues(item.values)
   );
 }
 
@@ -88,18 +154,11 @@ export function isHistoryEntry(value: unknown): value is HistoryEntry {
     return (
       typeof item.durationSeconds === "number" &&
       Number.isInteger(item.durationSeconds) &&
-      item.durationSeconds >= 1
+      item.durationSeconds >= 1 &&
+      (item.values === undefined || isVariableValues(item.values))
     );
   }
-  return (
-    (item.mode === undefined || item.mode === "sets") &&
-    typeof item.weight === "number" &&
-    Number.isFinite(item.weight) &&
-    item.weight >= 0 &&
-    typeof item.reps === "number" &&
-    Number.isInteger(item.reps) &&
-    item.reps >= 1
-  );
+  return item.mode === "sets" && isVariableValues(item.values);
 }
 
 export function isTimerSession(value: unknown): value is TimerSession {
@@ -167,14 +226,19 @@ export async function addSetEntry(
   );
 }
 
-export async function addTimeEntry(entry: HistoryEntry): Promise<HistoryEntry> {
+export async function addTimeEntry(
+  entry: HistoryEntry,
+  value?: ExerciseValue,
+): Promise<HistoryEntry> {
   return database.transaction(
     "rw",
     database.history,
     database.sessions,
+    database.exerciseValues,
     async () => {
       const id = await database.history.add(entry);
       await database.sessions.delete("active");
+      if (value) await database.exerciseValues.put(value);
       return { ...entry, id };
     },
   );

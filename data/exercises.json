@@ -1,17 +1,155 @@
 [
-  { "id": "press-banca", "name": "Press de banca", "type": "exercise", "muscleGroup": "chest", "image": "assets/exercises/press-banca.svg", "defaultWeight": 20, "defaultReps": 10 },
-  { "id": "pec-deck", "name": "Aperturas en pec deck", "type": "machine", "muscleGroup": "chest", "image": "assets/exercises/pec-deck.svg", "defaultWeight": 20, "defaultReps": 12 },
-  { "id": "cruce-poleas", "name": "Cruce de poleas", "type": "machine", "muscleGroup": "chest", "image": "assets/exercises/cruce-poleas.svg", "defaultWeight": 10, "defaultReps": 12 },
-  { "id": "jalon-polea", "name": "Jalón al pecho", "type": "machine", "muscleGroup": "back", "image": "assets/exercises/jalon-polea.svg", "defaultWeight": 25, "defaultReps": 10 },
-  { "id": "remo-sentado", "name": "Remo sentado", "type": "machine", "muscleGroup": "back", "image": "assets/exercises/remo-sentado.svg", "defaultWeight": 20, "defaultReps": 10 },
-  { "id": "press-hombros", "name": "Press de hombros", "type": "machine", "muscleGroup": "shoulders", "image": "assets/exercises/press-hombros.svg", "defaultWeight": 15, "defaultReps": 10 },
-  { "id": "curl-biceps", "name": "Curl de bíceps", "type": "exercise", "muscleGroup": "arms", "image": "assets/exercises/curl-biceps.svg", "defaultWeight": 8, "defaultReps": 12 },
-  { "id": "triceps-polea", "name": "Extensión de tríceps", "type": "machine", "muscleGroup": "arms", "image": "assets/exercises/triceps-polea.svg", "defaultWeight": 12, "defaultReps": 12 },
-  { "id": "sentadilla", "name": "Sentadilla", "type": "exercise", "muscleGroup": "legs", "image": "assets/exercises/sentadilla.svg", "defaultWeight": 20, "defaultReps": 10 },
-  { "id": "prensa-piernas", "name": "Prensa de piernas", "type": "machine", "muscleGroup": "legs", "image": "assets/exercises/prensa-piernas.svg", "defaultWeight": 40, "defaultReps": 10 },
-  { "id": "curl-femoral", "name": "Curl femoral", "type": "machine", "muscleGroup": "legs", "image": "assets/exercises/curl-femoral.svg", "defaultWeight": 20, "defaultReps": 12 },
-  { "id": "peso-muerto", "name": "Peso muerto", "type": "exercise", "muscleGroup": "glutes", "image": "assets/exercises/peso-muerto.svg", "defaultWeight": 30, "defaultReps": 8 },
-  { "id": "plancha", "name": "Plancha", "type": "exercise", "muscleGroup": "core", "image": "assets/exercises/plancha.svg", "defaultWeight": 0, "defaultReps": 1 },
-  { "id": "bicicleta-estatica", "name": "Bicicleta estática", "type": "machine", "muscleGroup": "cardio", "tracking": "time", "image": "assets/exercises/bicicleta-estatica.svg" },
-  { "id": "cinta-correr", "name": "Cinta de correr", "type": "machine", "muscleGroup": "cardio", "tracking": "time", "image": "assets/exercises/cinta-correr.svg" }
+  {
+    "id": "press-banca",
+    "name": "Press de banca",
+    "type": "exercise",
+    "muscleGroup": "chest",
+    "image": "assets/exercises/press-banca.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "pec-deck",
+    "name": "Aperturas en pec deck",
+    "type": "machine",
+    "muscleGroup": "chest",
+    "image": "assets/exercises/pec-deck.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "cruce-poleas",
+    "name": "Cruce de poleas",
+    "type": "machine",
+    "muscleGroup": "chest",
+    "image": "assets/exercises/cruce-poleas.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 10 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "jalon-polea",
+    "name": "Jalón al pecho",
+    "type": "machine",
+    "muscleGroup": "back",
+    "image": "assets/exercises/jalon-polea.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 25 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "remo-sentado",
+    "name": "Remo sentado",
+    "type": "machine",
+    "muscleGroup": "back",
+    "image": "assets/exercises/remo-sentado.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "press-hombros",
+    "name": "Press de hombros",
+    "type": "machine",
+    "muscleGroup": "shoulders",
+    "image": "assets/exercises/press-hombros.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 15 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "curl-biceps",
+    "name": "Curl de bíceps",
+    "type": "exercise",
+    "muscleGroup": "arms",
+    "image": "assets/exercises/curl-biceps.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 8 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "triceps-polea",
+    "name": "Extensión de tríceps",
+    "type": "machine",
+    "muscleGroup": "arms",
+    "image": "assets/exercises/triceps-polea.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 12 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "sentadilla",
+    "name": "Sentadilla",
+    "type": "exercise",
+    "muscleGroup": "legs",
+    "image": "assets/exercises/sentadilla.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "prensa-piernas",
+    "name": "Prensa de piernas",
+    "type": "machine",
+    "muscleGroup": "legs",
+    "image": "assets/exercises/presa-piernas.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 40 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
+  },
+  {
+    "id": "maquina-gemelos",
+    "name": "Máquina de gemelos",
+    "type": "machine",
+    "muscleGroup": "legs",
+    "image": "assets/exercises/maquina-gemelos.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "curl-femoral",
+    "name": "Curl femoral",
+    "type": "machine",
+    "muscleGroup": "legs",
+    "image": "assets/exercises/curl-piernas.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "extension-pierna",
+    "name": "Extensión de piernas",
+    "type": "machine",
+    "muscleGroup": "legs",
+    "image": "assets/exercises/extension-pierna.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "peso-muerto",
+    "name": "Peso muerto",
+    "type": "exercise",
+    "muscleGroup": "glutes",
+    "image": "assets/exercises/peso-muerto.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 30 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 8 }
+  },
+  {
+    "id": "plancha",
+    "name": "Plancha",
+    "type": "exercise",
+    "muscleGroup": "core",
+    "image": "assets/exercises/plancha.svg",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 0 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 1 }
+  },
+  {
+    "id": "bicicleta-estatica",
+    "name": "Bicicleta estática",
+    "type": "machine",
+    "muscleGroup": "cardio",
+    "tracking": "time",
+    "image": "assets/exercises/bicicleta-estatica.webp",
+    "v1": { "var": "resistencia", "txt": "Resistencia", "default": 1 }
+  },
+  {
+    "id": "cinta-correr",
+    "name": "Cinta de correr",
+    "type": "machine",
+    "muscleGroup": "cardio",
+    "tracking": "time",
+    "image": "assets/exercises/cinta-correr.webp",
+    "v1": { "var": "inclinacion", "txt": "Inclinación (%)", "default": 0 }
+  }
 ]

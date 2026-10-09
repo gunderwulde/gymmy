@@ -1,5 +1,5 @@
 import catalogData from "../data/exercises.json";
-import type { Exercise, ExerciseZone } from "./types";
+import type { Exercise, ExerciseVariable, ExerciseZone } from "./types";
 
 const ZONE_BY_GROUP: Record<string, Exclude<ExerciseZone, "all">> = {
   chest: "upper",
@@ -27,6 +27,22 @@ const REQUIRED_GROUPS = new Set([
   "cardio",
 ]);
 
+function isExerciseVariable(value: unknown): value is ExerciseVariable {
+  if (!value || typeof value !== "object") return false;
+  const variable = value as Record<string, unknown>;
+  return (
+    typeof variable.var === "string" &&
+    /^[a-z][a-z0-9_-]*$/.test(variable.var) &&
+    typeof variable.txt === "string" &&
+    variable.txt.trim() !== "" &&
+    typeof variable.default === "number" &&
+    Number.isFinite(variable.default) &&
+    variable.default >= 0 &&
+    (variable.var !== "repeticiones" ||
+      (Number.isInteger(variable.default) && variable.default >= 1))
+  );
+}
+
 export function validateCatalog(value: unknown): Exercise[] {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error(
@@ -53,29 +69,49 @@ export function validateCatalog(value: unknown): Exercise[] {
       !REQUIRED_GROUPS.has(item.muscleGroup) ||
       !("image" in item) ||
       typeof item.image !== "string" ||
-      !/^assets\/exercises\/[a-z0-9-]+\.svg$/.test(item.image)
+      !/^assets\/exercises\/[a-z0-9-]+\.(?:svg|webp)$/.test(item.image)
     ) {
       throw new Error(
         `Hay una entrada incompleta o inválida en el catálogo${item && "id" in item ? ` (${String(item.id)})` : ""}.`,
       );
     }
     const exercise = item as Exercise;
-    if (exercise.tracking === "time") {
-      if ("defaultWeight" in item || "defaultReps" in item) {
-        throw new Error(
-          `La actividad por tiempo «${exercise.id}» no debe definir peso ni repeticiones.`,
-        );
+    const variables = [exercise.v1, exercise.v2, exercise.v3];
+    const configuredVariables = variables.filter(
+      (variable): variable is ExerciseVariable => variable !== undefined,
+    );
+    const variableNames = new Set<string>();
+    const hasInvalidVariable = configuredVariables.some((variable) => {
+      if (!isExerciseVariable(variable) || variableNames.has(variable.var)) {
+        return true;
       }
-    } else if (
-      !("defaultWeight" in item) ||
-      !Number.isFinite(exercise.defaultWeight) ||
-      exercise.defaultWeight! < 0 ||
-      !("defaultReps" in item) ||
-      !Number.isInteger(exercise.defaultReps) ||
-      exercise.defaultReps! < 1
+      variableNames.add(variable.var);
+      return false;
+    });
+    const hasGap = variables.some(
+      (variable, index) =>
+        variable === undefined &&
+        variables.slice(index + 1).some((later) => later !== undefined),
+    );
+    if (
+      hasInvalidVariable ||
+      hasGap ||
+      ("defaultWeight" in item && item.defaultWeight !== undefined) ||
+      ("defaultReps" in item && item.defaultReps !== undefined)
     ) {
       throw new Error(
-        `Hay valores iniciales incompletos o inválidos en «${exercise.id}».`,
+        `Las variables de «${exercise.id}» están incompletas o son inválidas.`,
+      );
+    }
+    if (exercise.tracking === "time") {
+      if (exercise.v2 || exercise.v3) {
+        throw new Error(
+          `La actividad por tiempo «${exercise.id}» solo puede definir v1.`,
+        );
+      }
+    } else if (configuredVariables.length === 0) {
+      throw new Error(
+        `El ejercicio «${exercise.id}» debe definir al menos una variable.`,
       );
     }
     if (ids.has(exercise.id)) {

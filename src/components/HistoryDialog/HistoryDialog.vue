@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
 import { formatElapsedTime } from "../../timer";
+import { exerciseVariables, formatVariableValues } from "../../variables";
 import type { Exercise, HistoryEntry } from "../../types";
 
 const props = defineProps<{
@@ -59,15 +60,15 @@ function exerciseName(exerciseId: string): string {
 }
 
 function historyResult(entry: HistoryEntry): string {
-  return entry.mode === "time"
-    ? formatElapsedTime(entry.durationSeconds * 1000)
-    : `${formatWeight(entry.weight)} kg × ${entry.reps}`;
-}
-
-function formatWeight(weight: number): string {
-  return new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(
-    weight,
+  const exercise = props.catalog.find((item) => item.id === entry.exerciseId);
+  const details = formatVariableValues(
+    exercise ? exerciseVariables(exercise) : [],
+    entry.values,
   );
+  if (entry.mode !== "time") return details || "Registro";
+  return [formatElapsedTime(entry.durationSeconds * 1000), details]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function formatDay(date: Date): string {

@@ -8,29 +8,26 @@ import {
   saveExerciseValue,
   saveTimerSession,
 } from "../storage/database";
+import { elapsedMilliseconds, formatElapsedTime } from "../timer";
 import {
-  elapsedMilliseconds,
-  formatElapsedTime,
-  parseReps,
-  parseWeight,
-} from "../timer";
+  exerciseVariables,
+  formatVariableValues,
+  parseVariableValues,
+} from "../variables";
 import type {
   Exercise,
   ExerciseValue,
   HistoryEntry,
+  SetEntry,
+  TimeEntry,
   TimerSession,
   TimerState,
 } from "../types";
 
-export interface DraftValue {
-  weight: string;
-  reps: string;
-}
-
 export const useWorkoutStore = defineStore("workout", () => {
   const catalog = ref<Exercise[]>([]);
   const history = ref<HistoryEntry[]>([]);
-  const values = ref<Record<string, DraftValue>>({});
+  const values = ref<Record<string, Record<string, string>>>({});
   const timer = ref<TimerState | null>(null);
   const now = ref(Date.now());
   const ready = ref(false);
@@ -70,25 +67,20 @@ export const useWorkoutStore = defineStore("workout", () => {
       history.value = data.history;
       blocked.value = data.blocked;
       const saved = new Map(data.values.map((item) => [item.exerciseId, item]));
-      const drafts: Record<string, DraftValue> = {};
+      const drafts: Record<string, Record<string, string>> = {};
       for (const exercise of catalog.value) {
-        if (exercise.tracking === "time") continue;
         const previous = latestEntry(data.history, exercise.id);
         const stored = saved.get(exercise.id);
-        drafts[exercise.id] = {
-          weight: String(
-            stored?.weight ??
-              (previous && previous.mode !== "time"
-                ? previous.weight
-                : exercise.defaultWeight),
-          ),
-          reps: String(
-            stored?.reps ??
-              (previous && previous.mode !== "time"
-                ? previous.reps
-                : exercise.defaultReps),
-          ),
-        };
+        drafts[exercise.id] = Object.fromEntries(
+          exerciseVariables(exercise).map((variable) => [
+            variable.var,
+            String(
+              stored?.values[variable.var] ??
+                previous?.values?.[variable.var] ??
+                variable.default,
+            ),
+          ]),
+        );
       }
       values.value = drafts;
       timer.value = data.timer
@@ -108,25 +100,24 @@ export const useWorkoutStore = defineStore("workout", () => {
     }
   }
 
-  function updateDraft(
-    exerciseId: string,
-    field: keyof DraftValue,
-    value: string,
-  ) {
+  function updateDraft(exerciseId: string, variable: string, value: string) {
     const current = values.value[exerciseId];
     if (!current) return;
-    values.value[exerciseId] = { ...current, [field]: value };
+    values.value[exerciseId] = { ...current, [variable]: value };
   }
 
   async function saveDraft(exerciseId: string): Promise<void> {
     if (blocked.value) return;
+    const exercise = catalog.value.find((item) => item.id === exerciseId);
     const draft = values.value[exerciseId];
-    if (!draft) return;
-    const weight = parseWeight(draft.weight);
-    const reps = parseReps(draft.reps);
-    if (weight === null || reps === null) return;
+    if (!exercise || !draft) return;
+    const parsedValues = parseVariableValues(
+      exerciseVariables(exercise),
+      draft,
+    );
+    if (!parsedValues || !Object.keys(parsedValues).length) return;
     try {
-      await saveExerciseValue({ exerciseId, weight, reps });
+      await saveExerciseValue({ exerciseId, values: parsedValues });
     } catch (error) {
       announce(
         `No se pudieron guardar los valores: ${errorMessage(error)}`,
@@ -143,30 +134,33 @@ export const useWorkoutStore = defineStore("workout", () => {
       );
       return false;
     }
-    const draft = values.value[exercise.id];
-    const weight = parseWeight(draft?.weight ?? "");
-    const reps = parseReps(draft?.reps ?? "");
-    if (weight === null || reps === null) {
+    const exerciseVariablesList = exerciseVariables(exercise);
+    const parsedValues = parseVariableValues(
+      exerciseVariablesList,
+      values.value[exercise.id],
+    );
+    if (!parsedValues || !Object.keys(parsedValues).length) {
       announce(
-        "Revisa el peso y las repeticiones antes de registrar la serie.",
+        "Revisa las variables del ejercicio antes de registrar la serie.",
         true,
       );
       return false;
     }
-    const value: ExerciseValue = { exerciseId: exercise.id, weight, reps };
-    const entry: HistoryEntry = {
+    const value: ExerciseValue = {
+      exerciseId: exercise.id,
+      values: parsedValues,
+    };
+    const entry: SetEntry = {
       exerciseId: exercise.id,
       mode: "sets",
-      weight,
-      reps,
+      values: parsedValues,
       date: new Date().toISOString(),
     };
     try {
       const savedEntry = await addSetEntry(entry, value);
       history.value = [...history.value, savedEntry];
-      announce(
-        `${exercise.name}: ${formatWeight(weight)} kg × ${reps} registrado.`,
-      );
+      const result = formatVariableValues(exerciseVariablesList, parsedValues);
+      announce(`${exercise.name}: ${result} registrado.`);
       return true;
     } catch (error) {
       announce(`No se pudo guardar el registro: ${errorMessage(error)}`, true);
@@ -265,19 +259,41 @@ export const useWorkoutStore = defineStore("workout", () => {
       );
       return false;
     }
-    const entry: HistoryEntry = {
+    const exercise = catalog.value.find(
+      (item) => item.id === current.exerciseId,
+    );
+    const configuredVariables = exercise ? exerciseVariables(exercise) : [];
+    const parsedValues = parseVariableValues(
+      configuredVariables,
+      values.value[current.exerciseId],
+    );
+    if (!parsedValues) {
+      announce("Revisa la variable de la actividad antes de terminar.", true);
+      return false;
+    }
+    const value: ExerciseValue | undefined = Object.keys(parsedValues).length
+      ? { exerciseId: current.exerciseId, values: parsedValues }
+      : undefined;
+    const entry: TimeEntry = {
       exerciseId: current.exerciseId,
       mode: "time",
       durationSeconds,
+      ...(value ? { values: parsedValues } : {}),
       date: new Date().toISOString(),
     };
     try {
-      const savedEntry = await addTimeEntry(entry);
+      const savedEntry = await addTimeEntry(entry, value);
       history.value = [...history.value, savedEntry];
       timer.value = null;
       stopTicker();
+      const result = formatVariableValues(configuredVariables, parsedValues);
       announce(
-        `${catalog.value.find((item) => item.id === current.exerciseId)?.name ?? "Actividad"}: ${formatElapsedTime(durationSeconds * 1000)} registrado.`,
+        `${exercise?.name ?? "Actividad"}: ${[
+          formatElapsedTime(durationSeconds * 1000),
+          result,
+        ]
+          .filter(Boolean)
+          .join(" · ")} registrado.`,
       );
       return true;
     } catch (error) {
@@ -318,12 +334,6 @@ export const useWorkoutStore = defineStore("workout", () => {
     stopTicker,
   };
 });
-
-function formatWeight(weight: number): string {
-  return new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(
-    weight,
-  );
-}
 
 function toTimerSession(timer: TimerState): TimerSession {
   return {

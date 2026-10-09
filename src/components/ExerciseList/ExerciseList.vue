@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, ref, type ComponentPublicInstance } from "vue";
 import { latestEntry, exerciseZone } from "../../catalog";
 import { useWorkoutStore } from "../../stores/workout";
 import type { Exercise, ExerciseZone, SetEntry, TimeEntry } from "../../types";
@@ -30,6 +30,10 @@ const filters: Array<{ id: ExerciseZone; label: string }> = [
 const store = useWorkoutStore();
 const search = ref("");
 const selectedZone = ref<ExerciseZone>("all");
+type CardEditor = {
+  openEditor: (opener: HTMLElement) => void;
+};
+const cardEditors = new Map<string, CardEditor>();
 
 const filteredExercises = computed(() => {
   const query = search.value.trim().toLocaleLowerCase("es");
@@ -53,6 +57,31 @@ function latestSet(exercise: Exercise): SetEntry | null {
 function latestTime(exercise: Exercise): TimeEntry | null {
   const entry = latestEntry(store.history, exercise.id);
   return entry?.mode === "time" ? entry : null;
+}
+
+function setCardEditor(
+  exerciseId: string,
+  editor: Element | ComponentPublicInstance | null,
+) {
+  if (!editor) {
+    cardEditors.delete(exerciseId);
+  } else if (
+    !(editor instanceof Element) &&
+    "openEditor" in editor &&
+    typeof editor.openEditor === "function"
+  ) {
+    const openEditor = editor.openEditor;
+    cardEditors.set(exerciseId, {
+      openEditor: (opener) => Reflect.apply(openEditor, editor, [opener]),
+    });
+  }
+}
+
+function openCardEditor(exerciseId: string, event: MouseEvent) {
+  const opener = event.currentTarget;
+  if (opener instanceof HTMLElement) {
+    cardEditors.get(exerciseId)?.openEditor(opener);
+  }
 }
 
 async function recordSet(exercise: Exercise) {
@@ -103,7 +132,7 @@ async function finishTimer() {
   await nextTick();
   document
     .querySelector<HTMLElement>(
-      `#exercise-${CSS.escape(exerciseId)} [data-action="start"]`,
+      `#exercise-${CSS.escape(exerciseId)} [data-action="configure"]`,
     )
     ?.focus();
 }
@@ -172,22 +201,38 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
         class="exercise-card"
         :data-exercise-id="exercise.id"
       >
+        <button
+          class="card-activation"
+          type="button"
+          :aria-label="
+            exercise.tracking === 'time'
+              ? `Editar datos de ${exercise.name}`
+              : `Editar variables y registrar ${exercise.name}`
+          "
+          aria-haspopup="dialog"
+          data-action="configure"
+          @click="openCardEditor(exercise.id, $event)"
+        />
         <ExerciseCardSets
           v-if="exercise.tracking !== 'time'"
+          :ref="(editor) => setCardEditor(exercise.id, editor)"
           :exercise="exercise"
           :last-entry="latestSet(exercise)"
-          :weight="store.values[exercise.id]?.weight ?? ''"
-          :reps="store.values[exercise.id]?.reps ?? ''"
-          @update:weight="store.updateDraft(exercise.id, 'weight', $event)"
-          @update:reps="store.updateDraft(exercise.id, 'reps', $event)"
+          :values="store.values[exercise.id] ?? {}"
+          @update:value="
+            ({ variable, value }) =>
+              store.updateDraft(exercise.id, variable, value)
+          "
           @commit="store.saveDraft(exercise.id)"
           @done="recordSet(exercise)"
           @open-history="openExerciseHistory(exercise.id, $event)"
         />
         <ExerciseCardTimed
           v-else
+          :ref="(editor) => setCardEditor(exercise.id, editor)"
           :exercise="exercise"
           :last-entry="latestTime(exercise)"
+          :values="store.values[exercise.id] ?? {}"
           :elapsed-ms="store.timerElapsed(exercise.id)"
           :status="
             store.timer?.exerciseId !== exercise.id
@@ -199,6 +244,11 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
           :blocked="
             Boolean(store.timer && store.timer.exerciseId !== exercise.id)
           "
+          @update:value="
+            ({ variable, value }) =>
+              store.updateDraft(exercise.id, variable, value)
+          "
+          @commit="store.saveDraft(exercise.id)"
           @start="startTimer(exercise.id)"
           @pause="pauseTimer"
           @resume="resumeTimer"
@@ -326,6 +376,7 @@ h2 {
 }
 
 .exercise-card {
+  position: relative;
   min-width: 0;
   padding: 14px;
   display: grid;
@@ -337,6 +388,24 @@ h2 {
   transition:
     border-color 0.18s,
     transform 0.18s;
+}
+
+.card-activation {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.card-activation:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .exercise-card:hover {
