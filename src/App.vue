@@ -136,6 +136,5 @@ main {
   .app-shell {
     width: calc(100% - 24px);
   }
-
 }
 </style>
