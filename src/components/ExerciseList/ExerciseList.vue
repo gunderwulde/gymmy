@@ -10,16 +10,6 @@ const emit = defineEmits<{
   "open-history": [opener: HTMLElement, exerciseId: string];
 }>();
 
-const GROUP_NAMES: Record<string, string> = {
-  chest: "Pecho",
-  back: "Espalda",
-  shoulders: "Hombros",
-  arms: "Brazos",
-  legs: "Piernas",
-  glutes: "Glúteos",
-  core: "Core",
-  cardio: "Cardio",
-};
 const filters: Array<{ id: ExerciseZone; label: string }> = [
   { id: "all", label: "Todos" },
   { id: "upper", label: "Superiores" },
@@ -28,7 +18,6 @@ const filters: Array<{ id: ExerciseZone; label: string }> = [
 ];
 
 const store = useWorkoutStore();
-const search = ref("");
 const selectedZone = ref<ExerciseZone>("all");
 type CardEditor = {
   openEditor: (opener: HTMLElement) => void;
@@ -36,16 +25,11 @@ type CardEditor = {
 const cardEditors = new Map<string, CardEditor>();
 
 const filteredExercises = computed(() => {
-  const query = search.value.trim().toLocaleLowerCase("es");
   return store.sortedCatalog.filter((exercise) => {
-    const matchesZone =
+    return (
       selectedZone.value === "all" ||
-      exerciseZone(exercise.muscleGroup) === selectedZone.value;
-    const groupName = GROUP_NAMES[exercise.muscleGroup] ?? exercise.muscleGroup;
-    const matchesSearch =
-      !query ||
-      `${exercise.name} ${groupName}`.toLocaleLowerCase("es").includes(query);
-    return matchesZone && matchesSearch;
+      exerciseZone(exercise.muscleGroup) === selectedZone.value
+    );
   });
 });
 
@@ -145,28 +129,10 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
 <template>
   <section class="workout-section" aria-labelledby="exercise-heading">
     <div class="section-heading">
-      <div>
-        <p class="eyebrow section-eyebrow">TU RUTINA</p>
-        <h2 id="exercise-heading">
-          Ejercicios
-          <span class="count-badge">{{ filteredExercises.length }}</span>
-        </h2>
-      </div>
-    </div>
-    <div class="toolbar">
-      <label class="search-box">
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <circle cx="10.8" cy="10.8" r="6.8" />
-          <path d="m16 16 4.5 4.5" />
-        </svg>
-        <span class="visually-hidden">Buscar ejercicio</span>
-        <input
-          v-model="search"
-          type="search"
-          placeholder="Buscar ejercicio..."
-          autocomplete="off"
-        />
-      </label>
+      <h2 id="exercise-heading">
+        Ejercicios
+        <span class="count-badge">{{ filteredExercises.length }}</span>
+      </h2>
       <div class="filters" role="group" aria-label="Filtrar ejercicios">
         <button
           v-for="filter in filters"
@@ -261,9 +227,7 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
         />
       </article>
     </div>
-    <p v-else class="empty-state">
-      No hay ejercicios que coincidan con tu búsqueda.
-    </p>
+    <p v-else class="empty-state">No hay ejercicios en esta categoría.</p>
   </section>
 </template>
 
@@ -281,98 +245,51 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: end;
-  margin-bottom: 19px;
-}
-
-.section-eyebrow {
-  margin-bottom: 7px;
-  font-size: 9px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 h2 {
   margin: 0;
-  font-size: 25px;
-  letter-spacing: -0.7px;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
 .count-badge {
   display: inline-grid;
-  vertical-align: 4px;
+  vertical-align: 3px;
   place-items: center;
-  min-width: 23px;
-  height: 22px;
-  border-radius: 7px;
+  min-width: 20px;
+  height: 19px;
+  border-radius: 6px;
   background: var(--panel-soft);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0;
 }
 
-.toolbar {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 19px;
-}
-
-.search-box {
-  width: min(330px, 100%);
-  height: 43px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 13px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: var(--panel);
-  color: var(--muted);
-}
-
-.search-box input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.search-box input::placeholder {
-  color: #77837a;
-}
-
-.search-box svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .filters {
+  min-width: 0;
   display: flex;
-  gap: 5px;
-  padding: 4px;
+  gap: 2px;
+  padding: 3px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--panel);
 }
 
 .filter-button {
-  padding: 7px 11px;
+  padding: 6px 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 7px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .filter-button.is-active {
@@ -469,25 +386,16 @@ h2 {
 }
 
 @media (max-width: 480px) {
-  .toolbar {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  .filters {
-    width: 100%;
-    justify-content: space-between;
-  }
-
   .filter-button {
-    flex: 1;
-    padding-inline: 5px;
-    font-size: 11px;
+    padding-inline: 6px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  .filter-button {
+    padding-inline: 3px;
+    font-size: 8px;
   }
 }
 
@@ -496,31 +404,8 @@ h2 {
     margin-bottom: 8px;
   }
 
-  .section-eyebrow {
-    margin-bottom: 3px;
-    font-size: 8px;
-  }
-
-  h2 {
-    font-size: 20px;
-  }
-
-  .toolbar {
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .search-box {
-    height: 36px;
-  }
-
-  .filters {
-    padding: 2px;
-  }
-
   .filter-button {
-    padding: 5px 8px;
-    font-size: 10px;
+    padding-block: 5px;
   }
 }
 
@@ -529,17 +414,8 @@ h2 {
     margin-bottom: 4px;
   }
 
-  .toolbar {
-    gap: 5px;
-    margin-bottom: 4px;
-  }
-
-  .search-box {
-    height: 32px;
-  }
-
   .filter-button {
-    padding: 3px 6px;
+    padding-block: 3px;
   }
 }
 </style>

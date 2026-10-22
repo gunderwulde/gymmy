@@ -151,5 +151,13 @@
     "tracking": "time",
     "image": "assets/exercises/cinta-correr.webp",
     "v1": { "var": "inclinacion", "txt": "Inclinación (%)", "default": 0 }
+  },
+  {
+    "id": "andar-calle",
+    "name": "Andar por la calle",
+    "type": "exercise",
+    "muscleGroup": "cardio",
+    "tracking": "time",
+    "image": "assets/exercises/andar-calle.webp"
   }
 ]

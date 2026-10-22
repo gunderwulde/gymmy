@@ -67,6 +67,17 @@ describe("catálogo", () => {
     ).toHaveLength(1);
   });
 
+  it("incluye andar por la calle como actividad de cardio temporizada", () => {
+    expect(catalog.find((exercise) => exercise.id === "andar-calle")).toEqual({
+      id: "andar-calle",
+      name: "Andar por la calle",
+      type: "exercise",
+      muscleGroup: "cardio",
+      tracking: "time",
+      image: "assets/exercises/andar-calle.webp",
+    });
+  });
+
   it("selecciona la última entrada y ordena las actividades recientes primero", () => {
     const entries = [
       { exerciseId: "press-banca", date: "2026-01-01T10:00:00.000Z" },
