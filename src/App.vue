@@ -91,9 +91,6 @@ function errorMessage(error: unknown): string {
     <main>
       <ExerciseList @open-history="openHistory" />
     </main>
-    <footer class="footer">
-      <span>GYMMY</span><span>Tus datos se quedan en este dispositivo.</span>
-    </footer>
   </div>
 
   <HistoryDialog
@@ -116,10 +113,10 @@ function errorMessage(error: unknown): string {
   min-height: 0;
   margin-inline: auto;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
@@ -127,25 +124,6 @@ function errorMessage(error: unknown): string {
 main {
   min-height: 0;
   overflow: hidden;
-}
-
-.footer {
-  min-height: 0;
-  margin: 12px 0 10px;
-  padding-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  border-top: 1px solid #ffffff12;
-  color: #77837a;
-  font-size: 10px;
-}
-
-.footer span:first-child {
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
 }
 
 @media (max-width: 760px) {
@@ -159,10 +137,5 @@ main {
     width: calc(100% - 24px);
   }
 
-  .footer {
-    margin: 8px 0;
-    padding-top: 8px;
-    font-size: 9px;
-  }
 }
 </style>
