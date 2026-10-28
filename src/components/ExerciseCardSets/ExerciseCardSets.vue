@@ -25,19 +25,17 @@ const emit = defineEmits<{
 
 const variables = computed(() => exerciseVariables(props.exercise));
 const variableSummary = computed(() =>
-  variables.value
-    .map((variable) => {
-      const raw = props.values[variable.var] ?? String(variable.default);
-      const value = parseVariableValue(raw, variable);
-      const formatted =
-        value === null
-          ? raw
-          : new Intl.NumberFormat("es-ES", {
-              maximumFractionDigits: 2,
-            }).format(value);
-      return `${variable.txt}: ${formatted}`;
-    })
-    .join(" · "),
+  variables.value.map((variable) => {
+    const raw = props.values[variable.var] ?? String(variable.default);
+    const value = parseVariableValue(raw, variable);
+    const formatted =
+      value === null
+        ? raw
+        : new Intl.NumberFormat("es-ES", {
+            maximumFractionDigits: 2,
+          }).format(value);
+    return { key: variable.var, label: variable.txt, value: formatted };
+  }),
 );
 const errors = computed(
   () =>
@@ -103,7 +101,7 @@ function openEditor(control: HTMLElement) {
   });
 }
 
-defineExpose({ openEditor });
+defineExpose({ openEditor, closeEditor });
 
 function closeEditor() {
   dialog.value?.close();
@@ -171,69 +169,84 @@ function usePlaceholder(event: Event) {
       </button>
     </div>
 
-    <p class="variable-summary">{{ variableSummary }}</p>
+    <p class="variable-summary">
+      <span
+        v-for="item in variableSummary"
+        :key="item.key"
+        class="variable-item"
+      >
+        <span class="variable-label">{{ item.label }}</span>
+        <strong class="variable-value">{{ item.value }}</strong>
+      </span>
+    </p>
   </div>
 
-  <dialog
-    ref="dialog"
-    class="editor-dialog"
-    :aria-labelledby="`editor-title-${exercise.id}`"
-    @close="restoreFocus"
-    @cancel.prevent="closeEditor"
-  >
-    <div class="dialog-header">
-      <div>
-        <p class="eyebrow">REGISTRAR SERIE</p>
-        <h2 :id="`editor-title-${exercise.id}`">{{ exercise.name }}</h2>
+  <Teleport to="body">
+    <dialog
+      :id="`editor-dialog-${exercise.id}`"
+      ref="dialog"
+      class="editor-dialog"
+      :aria-labelledby="`editor-title-${exercise.id}`"
+      @close="restoreFocus"
+      @cancel.prevent="closeEditor"
+    >
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">REGISTRAR SERIE</p>
+          <h2 :id="`editor-title-${exercise.id}`">{{ exercise.name }}</h2>
+        </div>
+        <button
+          class="close-button"
+          type="button"
+          :aria-label="`Cerrar edición de ${exercise.name}`"
+          @click="closeEditor"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
       </div>
-      <button
-        class="close-button"
-        type="button"
-        :aria-label="`Cerrar edición de ${exercise.name}`"
-        @click="closeEditor"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
-      </button>
-    </div>
-    <div class="entry-controls">
-      <label
-        v-for="variable in variables"
-        :key="variable.var"
-        class="field-label"
-        :for="`${exercise.id}-${variable.var}`"
-      >
-        {{ variable.txt }}
-        <input
-          :id="`${exercise.id}-${variable.var}`"
-          class="field-input"
-          type="text"
-          :inputmode="variable.var === 'repeticiones' ? 'numeric' : 'decimal'"
-          autocomplete="off"
-          :value="values[variable.var] ?? variable.default"
-          :aria-invalid="Boolean(errors[variable.var])"
-          :aria-describedby="`${exercise.id}-${variable.var}-error`"
-          @input="updateValue(variable.var, $event)"
-          @change="commit"
-        />
-        <span :id="`${exercise.id}-${variable.var}-error`" class="field-error">
-          {{ errors[variable.var] }}
-        </span>
-      </label>
-      <button
-        class="done-button"
-        type="button"
-        :aria-label="`Registrar ${exercise.name} como hecho`"
-        @click="record"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="m5 12 4.5 4.5L19 7" />
-        </svg>
-        Hecho
-      </button>
-    </div>
-  </dialog>
+      <div class="entry-controls">
+        <label
+          v-for="variable in variables"
+          :key="variable.var"
+          class="field-label"
+          :for="`${exercise.id}-${variable.var}`"
+        >
+          {{ variable.txt }}
+          <input
+            :id="`${exercise.id}-${variable.var}`"
+            class="field-input"
+            type="text"
+            :inputmode="variable.var === 'repeticiones' ? 'numeric' : 'decimal'"
+            autocomplete="off"
+            :value="values[variable.var] ?? variable.default"
+            :aria-invalid="Boolean(errors[variable.var])"
+            :aria-describedby="`${exercise.id}-${variable.var}-error`"
+            @input="updateValue(variable.var, $event)"
+            @change="commit"
+          />
+          <span
+            :id="`${exercise.id}-${variable.var}-error`"
+            class="field-error"
+          >
+            {{ errors[variable.var] }}
+          </span>
+        </label>
+        <button
+          class="done-button"
+          type="button"
+          :aria-label="`Registrar ${exercise.name} como hecho`"
+          @click="record"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m5 12 4.5 4.5L19 7" />
+          </svg>
+          Hecho
+        </button>
+      </div>
+    </dialog>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -326,11 +339,34 @@ function usePlaceholder(event: Event) {
   width: 100%;
   min-width: 0;
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
   overflow: hidden;
   color: var(--text);
-  font-size: 11px;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.variable-item {
+  min-width: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.variable-label {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+.variable-value {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
 .editor-dialog {
@@ -478,10 +514,66 @@ function usePlaceholder(event: Event) {
     font-size: 13px;
   }
 
+  .muscle-label,
+  .last-session,
+  .history-shortcut {
+    font-size: 12px;
+  }
+
+  .variable-summary {
+    gap: 10px;
+  }
+
+  .variable-label {
+    font-size: 11px;
+  }
+
+  .variable-value {
+    font-size: 22px;
+  }
+
+  .history-shortcut {
+    min-height: 32px;
+    padding-inline: 4px;
+  }
+
+  .editor-dialog {
+    max-height: 90dvh;
+    padding: 18px;
+  }
+
+  .entry-controls {
+    gap: 10px;
+  }
+
+  .field-label {
+    font-size: 13px;
+  }
+
+  .field-input {
+    height: 46px;
+    font-size: 16px;
+  }
+
+  .field-error {
+    font-size: 12px;
+  }
+
+  .close-button {
+    width: 44px;
+    height: 44px;
+  }
+
   .done-button {
     grid-column: 1 / -1;
+    height: 50px;
     padding-inline: 8px;
-    font-size: 10px;
+    font-size: 15px;
+  }
+
+  .done-button svg {
+    width: 18px;
+    height: 18px;
   }
 }
 </style>

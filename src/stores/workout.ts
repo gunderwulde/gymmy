@@ -158,7 +158,12 @@ export const useWorkoutStore = defineStore("workout", () => {
     };
     try {
       const savedEntry = await addSetEntry(entry, value);
-      history.value = [...history.value, savedEntry];
+      history.value = [
+        ...history.value.filter(
+          (item) => item.id === undefined || item.id !== savedEntry.id,
+        ),
+        savedEntry,
+      ];
       const result = formatVariableValues(exerciseVariablesList, parsedValues);
       announce(`${exercise.name}: ${result} registrado.`);
       return true;

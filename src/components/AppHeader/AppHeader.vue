@@ -301,7 +301,11 @@ h1 span {
   }
 
   .hero-copy {
-    font-size: 8px;
+    font-size: 10px;
+  }
+
+  .icon-button {
+    min-height: 44px;
   }
 }
 

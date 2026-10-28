@@ -21,6 +21,7 @@ const store = useWorkoutStore();
 const selectedZone = ref<ExerciseZone>("all");
 type CardEditor = {
   openEditor: (opener: HTMLElement) => void;
+  closeEditor?: () => void;
 };
 const cardEditors = new Map<string, CardEditor>();
 
@@ -55,8 +56,13 @@ function setCardEditor(
     typeof editor.openEditor === "function"
   ) {
     const openEditor = editor.openEditor;
+    const closeEditor: unknown = Reflect.get(editor, "closeEditor");
     cardEditors.set(exerciseId, {
       openEditor: (opener) => Reflect.apply(openEditor, editor, [opener]),
+      closeEditor:
+        typeof closeEditor === "function"
+          ? () => Reflect.apply(closeEditor, editor, [])
+          : undefined,
     });
   }
 }
@@ -71,12 +77,7 @@ function openCardEditor(exerciseId: string, event: MouseEvent) {
 async function recordSet(exercise: Exercise) {
   const saved = await store.recordSet(exercise);
   if (!saved) return;
-  await nextTick();
-  document
-    .querySelector<HTMLElement>(
-      `#exercise-${CSS.escape(exercise.id)} button.done-button`,
-    )
-    ?.focus();
+  cardEditors.get(exercise.id)?.closeEditor?.();
 }
 
 async function startTimer(exerciseId: string) {
@@ -343,9 +344,11 @@ h2 {
   outline-offset: 2px;
 }
 
-.exercise-card:hover {
-  border-color: #435447;
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .exercise-card:hover {
+    border-color: #435447;
+    transform: translateY(-1px);
+  }
 }
 
 .empty-state {
@@ -386,16 +389,38 @@ h2 {
 }
 
 @media (max-width: 480px) {
+  .section-heading {
+    flex-wrap: wrap;
+  }
+
+  .filters {
+    flex: 1 1 auto;
+    justify-content: space-between;
+  }
+
   .filter-button {
+    flex: 1 1 0;
+    min-height: 36px;
     padding-inline: 6px;
-    font-size: 9px;
+    font-size: 12px;
+  }
+
+  .exercise-list {
+    gap: 10px;
+    padding-bottom: 4px;
+  }
+
+  .exercise-card {
+    padding: 12px;
+    gap: 12px;
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 }
 
 @media (max-width: 360px) {
   .filter-button {
     padding-inline: 3px;
-    font-size: 8px;
+    font-size: 11px;
   }
 }
 

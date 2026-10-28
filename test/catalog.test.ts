@@ -80,24 +80,24 @@ describe("catálogo", () => {
 
   it("selecciona la última entrada y ordena las actividades recientes primero", () => {
     const entries = [
-      { exerciseId: "press-banca", date: "2026-01-01T10:00:00.000Z" },
-      { exerciseId: "sentadilla", date: "2026-01-03T10:00:00.000Z" },
-      { exerciseId: "press-banca", date: "2026-01-02T10:00:00.000Z" },
+      { exerciseId: "remo-sentado", date: "2026-01-01T10:00:00.000Z" },
+      { exerciseId: "prensa-piernas", date: "2026-01-03T10:00:00.000Z" },
+      { exerciseId: "remo-sentado", date: "2026-01-02T10:00:00.000Z" },
     ];
-    expect(latestEntry(entries, "press-banca")).toBe(entries[2]);
+    expect(latestEntry(entries, "remo-sentado")).toBe(entries[2]);
     expect(latestEntry(entries, "jalon-polea")).toBeNull();
     const activities = [
-      "press-banca",
+      "remo-sentado",
       "bicicleta-estatica",
       "cinta-correr",
-      "sentadilla",
+      "prensa-piernas",
       "pec-deck",
     ].map((id) => catalog.find((exercise) => exercise.id === id) as Exercise);
     expect(
       sortByLatestUsage(activities, entries).map((exercise) => exercise.id),
     ).toEqual([
-      "sentadilla",
-      "press-banca",
+      "prensa-piernas",
+      "remo-sentado",
       "bicicleta-estatica",
       "cinta-correr",
       "pec-deck",

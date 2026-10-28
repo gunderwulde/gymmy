@@ -44,6 +44,6 @@ La tarjeta completa es la superficie táctil para abrir el popup de edición. Re
 
 - Presentacional: no accede al store; `ExerciseList` conecta eventos y valores.
 - «Hecho» no registra valores vacíos, negativos ni no numéricos y muestra el error junto al campo. Reglas específicas como la integralidad de las repeticiones se aplican según la variable.
-- Cada pulsación de «Hecho» añade una serie al historial; nunca sobrescribe las anteriores (lo garantiza el store).
-- Al registrar, la lista se puede reordenar sin perder el foco dentro del popup.
+- Al pulsar «Hecho» se guarda la serie; si ya hay una del mismo ejercicio en el mismo día, se sobrescribe (lo garantiza la capa de almacenamiento). Las de otros días se conservan.
+- Si el guardado tiene éxito, el popup se cierra y el foco vuelve a la tarjeta, que puede haberse reordenado. Si falla, el popup sigue abierto con el error visible.
 - Las entradas guardan valores por clave `var`. La migración de IndexedDB convierte registros anteriores de peso/repeticiones a `peso`/`repeticiones` sin perder entradas.

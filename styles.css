@@ -50,6 +50,12 @@ button,
 input,
 select {
   font: inherit;
+  touch-action: manipulation;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
 button {

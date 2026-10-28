@@ -76,19 +76,19 @@ describe("sesiones temporizadas", () => {
   it("registra las variables configuradas en ejercicios por series", async () => {
     store = useWorkoutStore();
     await store.load();
-    const exercise = store.catalog.find((item) => item.id === "press-banca");
+    const exercise = store.catalog.find((item) => item.id === "pec-deck");
     expect(exercise).toBeDefined();
-    store.updateDraft("press-banca", "peso", "32,5");
-    store.updateDraft("press-banca", "repeticiones", "9");
+    store.updateDraft("pec-deck", "peso", "32,5");
+    store.updateDraft("pec-deck", "repeticiones", "9");
 
     await expect(store.recordSet(exercise!)).resolves.toBe(true);
     expect(store.history[0]).toMatchObject({
-      exerciseId: "press-banca",
+      exerciseId: "pec-deck",
       mode: "sets",
       values: { peso: 32.5, repeticiones: 9 },
     });
-    expect(await database.exerciseValues.get("press-banca")).toEqual({
-      exerciseId: "press-banca",
+    expect(await database.exerciseValues.get("pec-deck")).toEqual({
+      exerciseId: "pec-deck",
       values: { peso: 32.5, repeticiones: 9 },
     });
   });

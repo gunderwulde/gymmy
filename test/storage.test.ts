@@ -42,6 +42,29 @@ describe("persistencia IndexedDB", () => {
     expect(loaded.blocked).toBe(false);
   });
 
+  it("sobrescribe la serie del mismo día y conserva la de otros días", async () => {
+    const make = (date: string, peso: number) => ({
+      entry: {
+        exerciseId: "pec-deck",
+        mode: "sets" as const,
+        values: { peso, repeticiones: 8 },
+        date,
+      },
+      value: { exerciseId: "pec-deck", values: { peso, repeticiones: 8 } },
+    });
+    const first = make("2026-01-02T10:00:00", 30);
+    const second = make("2026-01-02T18:00:00", 35);
+    const next = make("2026-01-03T10:00:00", 40);
+    const saved = await addSetEntry(first.entry, first.value);
+    const overwritten = await addSetEntry(second.entry, second.value);
+    await addSetEntry(next.entry, next.value);
+    expect(overwritten.id).toBe(saved.id);
+    const { history } = await loadWorkoutData();
+    expect(history).toHaveLength(2);
+    expect(history[0]).toMatchObject(second.entry);
+    expect(history[1]).toMatchObject(next.entry);
+  });
+
   it("respalda registros dañados en IndexedDB y bloquea sobrescrituras", async () => {
     await database.exerciseValues.put({
       exerciseId: "invalid",

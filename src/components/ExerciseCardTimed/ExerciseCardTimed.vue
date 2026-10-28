@@ -223,56 +223,58 @@ function usePlaceholder(event: Event) {
     </div>
   </div>
 
-  <dialog
-    ref="dialog"
-    class="activity-dialog"
-    :aria-labelledby="`activity-title-${exercise.id}`"
-    @close="restoreFocus"
-    @cancel.prevent="closeEditor"
-  >
-    <div class="dialog-header">
-      <div>
-        <p class="eyebrow">ACTIVIDAD TEMPORIZADA</p>
-        <h2 :id="`activity-title-${exercise.id}`">{{ exercise.name }}</h2>
-      </div>
-      <button
-        ref="closeButton"
-        class="close-button"
-        type="button"
-        :aria-label="`Cerrar actividad de ${exercise.name}`"
-        @click="closeEditor"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
-      </button>
-    </div>
-    <label
-      v-if="variable"
-      class="variable-field"
-      :for="`${exercise.id}-${variable.var}`"
+  <Teleport to="body">
+    <dialog
+      ref="dialog"
+      class="activity-dialog"
+      :aria-labelledby="`activity-title-${exercise.id}`"
+      @close="restoreFocus"
+      @cancel.prevent="closeEditor"
     >
-      {{ variable.txt }}
-      <input
-        :id="`${exercise.id}-${variable.var}`"
-        class="field-input"
-        type="text"
-        inputmode="decimal"
-        autocomplete="off"
-        :value="values[variable.var] ?? variable.default"
-        :aria-invalid="Boolean(variableError)"
-        :aria-describedby="`${exercise.id}-${variable.var}-error`"
-        @input="updateValue"
-        @change="emit('commit')"
-      />
-      <span :id="`${exercise.id}-${variable.var}-error`" class="field-error">
-        {{ variableError }}
-      </span>
-    </label>
-    <p v-else class="empty-variable">
-      Esta actividad no tiene variables adicionales.
-    </p>
-  </dialog>
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">ACTIVIDAD TEMPORIZADA</p>
+          <h2 :id="`activity-title-${exercise.id}`">{{ exercise.name }}</h2>
+        </div>
+        <button
+          ref="closeButton"
+          class="close-button"
+          type="button"
+          :aria-label="`Cerrar actividad de ${exercise.name}`"
+          @click="closeEditor"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
+      <label
+        v-if="variable"
+        class="variable-field"
+        :for="`${exercise.id}-${variable.var}`"
+      >
+        {{ variable.txt }}
+        <input
+          :id="`${exercise.id}-${variable.var}`"
+          class="field-input"
+          type="text"
+          inputmode="decimal"
+          autocomplete="off"
+          :value="values[variable.var] ?? variable.default"
+          :aria-invalid="Boolean(variableError)"
+          :aria-describedby="`${exercise.id}-${variable.var}-error`"
+          @input="updateValue"
+          @change="emit('commit')"
+        />
+        <span :id="`${exercise.id}-${variable.var}-error`" class="field-error">
+          {{ variableError }}
+        </span>
+      </label>
+      <p v-else class="empty-variable">
+        Esta actividad no tiene variables adicionales.
+      </p>
+    </dialog>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -550,6 +552,51 @@ function usePlaceholder(event: Event) {
 
   .exercise-name {
     font-size: 13px;
+  }
+
+  .muscle-label,
+  .last-session,
+  .history-shortcut,
+  .empty-variable {
+    font-size: 12px;
+  }
+
+  .variable-summary {
+    font-size: 13px;
+  }
+
+  .history-shortcut {
+    min-height: 32px;
+    padding-inline: 4px;
+  }
+
+  .timer-button {
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  .activity-dialog {
+    max-height: 90dvh;
+    padding: 18px;
+  }
+
+  .variable-field {
+    max-width: none;
+    font-size: 13px;
+  }
+
+  .field-input {
+    height: 46px;
+    font-size: 16px;
+  }
+
+  .field-error {
+    font-size: 12px;
+  }
+
+  .close-button {
+    width: 44px;
+    height: 44px;
   }
 }
 </style>

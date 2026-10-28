@@ -210,6 +210,16 @@ export async function saveExerciseValue(value: ExerciseValue): Promise<void> {
   await database.exerciseValues.put(value);
 }
 
+function sameLocalDay(first: string, second: string): boolean {
+  const a = new Date(first);
+  const b = new Date(second);
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
 export async function addSetEntry(
   entry: HistoryEntry,
   value: ExerciseValue,
@@ -219,7 +229,24 @@ export async function addSetEntry(
     database.history,
     database.exerciseValues,
     async () => {
-      const id = await database.history.add(entry);
+      const sameDay = (
+        await database.history
+          .where("exerciseId")
+          .equals(entry.exerciseId)
+          .toArray()
+      )
+        .filter(
+          (item) => item.mode === "sets" && sameLocalDay(item.date, entry.date),
+        )
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .at(-1);
+      let id: number;
+      if (sameDay?.id !== undefined) {
+        id = sameDay.id;
+        await database.history.put({ ...entry, id });
+      } else {
+        id = await database.history.add(entry);
+      }
       await database.exerciseValues.put(value);
       return { ...entry, id };
     },
