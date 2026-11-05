@@ -37,7 +37,7 @@ Los filtros son **Todos**, **Superiores**, **Inferiores** y **Cardio** (sustituy
 
 ## Orden
 
-Se ordenan primero los ejercicios pendientes de hoy y después los ya hechos hoy (que se tiñen de rojizo); dentro de cada grupo, por último uso. Se reordena tras cada registro. El filtro no altera el criterio de orden.
+Se ordenan primero los ejercicios pendientes de hoy y después los ya hechos hoy (que se tiñen de rojizo); dentro de cada grupo, por último uso. Se reordena tras cada registro. Si hay un plan de la IA, los ejercicios de hoy (calentamiento + rutina activa) van primero y el resto se atenúa y va al final; un selector «Rutina de hoy» permite cambiar la rutina solo para hoy. Cada tarjeta recibe `target` con el objetivo del plan. El filtro no altera el criterio de orden.
 
 ## Interfaz
 

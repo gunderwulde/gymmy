@@ -12,6 +12,7 @@ const props = defineProps<{
   status: "idle" | "running" | "paused";
   blocked: boolean;
   values: Record<string, string>;
+  target?: string;
 }>();
 
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -137,6 +138,7 @@ function usePlaceholder(event: Event) {
     <p v-if="variable" class="variable-summary">
       {{ variableSummary }}
     </p>
+    <p v-if="target" class="target-line">Objetivo: {{ target }}</p>
     <div class="entry-controls timer-controls">
       <output
         class="timer-display"
@@ -307,6 +309,13 @@ function usePlaceholder(event: Event) {
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.target-line {
+  margin: 4px 0 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .empty-variable {

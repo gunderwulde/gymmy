@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useRegisterSW } from "virtual:pwa-register/vue";
 import AppHeader from "./components/AppHeader/AppHeader.vue";
 import ExerciseList from "./components/ExerciseList/ExerciseList.vue";
+import PlanImportDialog from "./components/PlanImportDialog/PlanImportDialog.vue";
 import SharedDataDialog from "./components/SharedDataDialog/SharedDataDialog.vue";
 import UpdateBanner from "./components/UpdateBanner/UpdateBanner.vue";
 import { useWorkoutStore } from "./stores/workout";
@@ -14,6 +15,7 @@ const store = useWorkoutStore();
 const installable = ref(false);
 const updateDismissed = ref(false);
 const sharedData = ref<SharedData | null>(null);
+const planDialog = ref<InstanceType<typeof PlanImportDialog> | null>(null);
 const { needRefresh, updateServiceWorker } = useRegisterSW();
 
 interface InstallPromptEvent extends Event {
@@ -97,11 +99,19 @@ function errorMessage(error: unknown): string {
       :installable="installable"
       @install="installApp"
       @export="exportRoutines"
+      @import-plan="planDialog?.open()"
     />
     <main>
       <ExerciseList />
     </main>
   </div>
+
+  <PlanImportDialog
+    ref="planDialog"
+    :catalog="store.catalog"
+    :values="store.values"
+    @apply="store.applyPlan"
+  />
 
   <SharedDataDialog :data="sharedData" @close="sharedData = null" />
 

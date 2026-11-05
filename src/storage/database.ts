@@ -1,4 +1,5 @@
 import Dexie, { type Table } from "dexie";
+import type { PlanRecord } from "../plan";
 import type { ExerciseValue, HistoryEntry, TimerSession } from "../types";
 
 export interface BackupRecord {
@@ -17,6 +18,7 @@ export class GymmyDatabase extends Dexie {
   history!: Table<HistoryEntry, number>;
   sessions!: Table<TimerSession, string>;
   backups!: Table<BackupRecord, number>;
+  plans!: Table<PlanRecord, string>;
 
   constructor(name = "gymmy") {
     super(name);
@@ -104,6 +106,13 @@ export class GymmyDatabase extends Dexie {
             }
           });
       });
+    this.version(4).stores({
+      exerciseValues: "&exerciseId",
+      history: "++id, exerciseId, date",
+      sessions: "&id",
+      backups: "++id, createdAt",
+      plans: "&id",
+    });
   }
 }
 
@@ -277,4 +286,44 @@ export async function saveTimerSession(session: TimerSession): Promise<void> {
 
 export async function clearTimerSession(): Promise<void> {
   await database.sessions.delete("active");
+}
+
+export async function loadPlanRecord(): Promise<PlanRecord | null> {
+  await database.open();
+  const record = await database.plans.get("current");
+  return record && isPlanRecord(record) ? record : null;
+}
+
+export function isPlanRecord(value: unknown): value is PlanRecord {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<PlanRecord>;
+  return (
+    item.id === "current" &&
+    typeof item.receivedAt === "string" &&
+    !!item.plan &&
+    Array.isArray(item.plan.routines) &&
+    typeof item.plan.targets === "object" &&
+    item.plan.targets !== null &&
+    Array.isArray(item.plan.daily)
+  );
+}
+
+export async function savePlanRecord(record: PlanRecord): Promise<void> {
+  await database.plans.put(record);
+}
+
+/** Guarda el plan y los valores objetivo en una sola transacción. */
+export async function applyPlanRecord(
+  record: PlanRecord,
+  values: ExerciseValue[],
+): Promise<void> {
+  await database.transaction(
+    "rw",
+    database.plans,
+    database.exerciseValues,
+    async () => {
+      await database.plans.put(record);
+      await database.exerciseValues.bulkPut(values);
+    },
+  );
 }

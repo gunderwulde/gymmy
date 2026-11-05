@@ -13,6 +13,7 @@ La tarjeta completa es la superficie táctil para abrir el popup de edición. Re
 - Ilustración a la izquierda (82×82, `loading="lazy"`, texto alternativo `«<nombre>, ilustración»`, reemplazo local si falla la carga).
 - Nombre, etiqueta del tipo (Máquina / Libre) y grupo muscular.
 - Valores actuales de las variables, con etiqueta y valor en grande.
+- Si hay plan, una línea «Objetivo: 42,5 kg × 10» (prop opcional `target`).
 - Al pulsar la tarjeta se abre el popup para editar y registrar una serie. La tarjeta no muestra campos de entrada ni el botón «Hecho».
 - La tarjeta completa admite activación con puntero y teclado; los controles interiores conservan su propia acción y no abren el popup de registro.
 - Si aún no hay valores registrados, el resumen usa los valores editados guardados o `default`.

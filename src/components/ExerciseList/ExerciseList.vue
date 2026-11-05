@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, type ComponentPublicInstance } from "vue";
-import { doneOnDay, exerciseZone, sortPendingFirst } from "../../catalog";
+import { doneOnDay, exerciseZone, sortForToday } from "../../catalog";
+import { targetText } from "../../plan";
 import { useWorkoutStore } from "../../stores/workout";
 import type { Exercise, ExerciseZone, HistoryEntry } from "../../types";
 import ExerciseCardSets from "../ExerciseCardSets/ExerciseCardSets.vue";
@@ -22,10 +23,11 @@ type CardEditor = {
 const cardEditors = new Map<string, CardEditor>();
 
 const filteredExercises = computed(() => {
-  const ordered = sortPendingFirst(
+  const ordered = sortForToday(
     store.sortedCatalog,
     store.history,
     new Date(),
+    store.todayIds,
   );
   return ordered.filter((exercise) => {
     return (
@@ -47,6 +49,20 @@ const historyByExercise = computed(() => {
 
 function exerciseHistory(exerciseId: string): HistoryEntry[] {
   return historyByExercise.value.get(exerciseId) ?? [];
+}
+
+function targetFor(exercise: Exercise): string {
+  const target = store.planRecord?.plan.targets[exercise.id];
+  return target ? targetText(exercise, target) : "";
+}
+
+function isOffToday(exercise: Exercise): boolean {
+  return store.todayIds !== null && !store.todayIds.has(exercise.id);
+}
+
+function chooseRoutine(event: Event) {
+  if (!(event.target instanceof HTMLSelectElement)) return;
+  void store.selectRoutine(event.target.value || null);
 }
 
 function isDoneToday(exercise: Exercise): boolean {
@@ -153,6 +169,19 @@ async function finishTimer() {
         </button>
       </div>
     </div>
+    <label v-if="store.planRecord" class="routine-picker">
+      Rutina de hoy
+      <select :value="store.routineId ?? ''" @change="chooseRoutine">
+        <option value="">Solo calentamiento</option>
+        <option
+          v-for="routine in store.planRecord.plan.routines"
+          :key="routine.id"
+          :value="routine.id"
+        >
+          {{ routine.name }}
+        </option>
+      </select>
+    </label>
     <p
       v-if="store.message"
       class="app-message"
@@ -175,7 +204,10 @@ async function finishTimer() {
         :id="`exercise-${exercise.id}`"
         :key="exercise.id"
         class="exercise-card"
-        :class="{ 'is-done-today': isDoneToday(exercise) }"
+        :class="{
+          'is-done-today': isDoneToday(exercise),
+          'is-off-today': isOffToday(exercise),
+        }"
         :data-exercise-id="exercise.id"
       >
         <button
@@ -196,6 +228,7 @@ async function finishTimer() {
           :exercise="exercise"
           :history="exerciseHistory(exercise.id)"
           :values="store.values[exercise.id] ?? {}"
+          :target="targetFor(exercise)"
           @update:value="
             ({ variable, value }) =>
               store.updateDraft(exercise.id, variable, value)
@@ -209,6 +242,7 @@ async function finishTimer() {
           :exercise="exercise"
           :history="exerciseHistory(exercise.id)"
           :values="store.values[exercise.id] ?? {}"
+          :target="targetFor(exercise)"
           :elapsed-ms="store.timerElapsed(exercise.id)"
           :status="
             store.timer?.exerciseId !== exercise.id
@@ -333,6 +367,32 @@ h2 {
 .exercise-card.is-done-today {
   border-color: #6b3a35;
   background: #2b1a19;
+}
+
+.exercise-card.is-off-today {
+  opacity: 0.5;
+}
+
+.routine-picker {
+  flex: 0 0 auto;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.routine-picker select {
+  min-height: 40px;
+  min-width: 0;
+  flex: 1;
+  padding: 0 8px;
+  border: 1px solid #35433a;
+  border-radius: 8px;
+  background: #111813;
+  color: var(--text);
+  font-size: 16px;
 }
 
 .card-activation {

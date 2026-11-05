@@ -1,4 +1,5 @@
 import { buildProgressSeries } from "./progress";
+import { PLAN_FENCE, PLAN_VERSION, WARMUP_ID, WARMUP_MINUTES } from "./plan";
 import { exerciseVariables, formatVariableValues } from "./variables";
 import { formatElapsedTime } from "./timer";
 import type { Exercise, HistoryEntry } from "./types";
@@ -45,6 +46,11 @@ function section(
   const lines = [
     `### ${exercise.name}`,
     "",
+    `- Id: \`${exercise.id}\` · Variables (clave = etiqueta): ${
+      exerciseVariables(exercise)
+        .map((variable) => `${variable.var} = ${variable.txt}`)
+        .join(", ") || "ninguna"
+    }${exercise.tracking === "time" ? " · Actividad temporizada (objetivo en minutos)" : ""}`,
     `- Tipo: ${exercise.type === "machine" ? "máquina" : "peso libre"} · Grupo: ${GROUP_NAMES[exercise.muscleGroup] ?? exercise.muscleGroup}`,
   ];
   if (!own.length) {
@@ -137,7 +143,60 @@ export function buildRoutineMarkdown(
       ...section(exercise, history, (entry) => describeEntry(exercise, entry)),
     );
   }
+  lines.push(...protocolSection(catalog));
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
 export const EXPORT_FILE_NAME = "gymmy-rutinas.md";
+
+function protocolSection(catalog: Exercise[]): string[] {
+  const hasWarmup = catalog.some((exercise) => exercise.id === WARMUP_ID);
+  const sample = catalog.find(
+    (exercise) => exercise.tracking !== "time" && exercise.v1?.var === "peso",
+  );
+  const example = JSON.stringify(
+    {
+      gymmy: PLAN_VERSION,
+      routines: [
+        {
+          id: "empuje",
+          name: "Empuje",
+          days: ["lun", "jue"],
+          exercises: sample ? [sample.id] : [],
+        },
+      ],
+      targets: {
+        ...(sample
+          ? { [sample.id]: { values: { peso: 42.5, repeticiones: 10 } } }
+          : {}),
+        ...(hasWarmup ? { [WARMUP_ID]: { minutes: WARMUP_MINUTES } } : {}),
+      },
+      notes: "Texto breve opcional con el motivo de los cambios.",
+    },
+    null,
+    2,
+  );
+  return [
+    "",
+    "## Protocolo de respuesta (importante)",
+    "",
+    `Responde con tus comentarios y, al final, **un único bloque de código** con la etiqueta \`${PLAN_FENCE}\` que contenga JSON válido. Gymmy lo leerá automáticamente. Reglas:`,
+    "",
+    `- \`"gymmy": ${PLAN_VERSION}\` es obligatorio.`,
+    "- `routines`: lista de rutinas con `id`, `name`, `days` (`lun`, `mar`, `mie`, `jue`, `vie`, `sab`, `dom`) y `exercises` (ids de arriba). Cada día de la semana en como mucho una rutina.",
+    "- `targets`: objetivo del **próximo entrenamiento** por id de ejercicio. `values` usa las claves de cada ejercicio (números; `repeticiones` entero ≥ 1; pesos en kg). En actividades temporizadas usa `minutes`.",
+    "- Usa solo ids y claves que aparezcan en este documento. No añadas ejercicios nuevos.",
+    ...(hasWarmup
+      ? [
+          `- Regla fija: el calentamiento en la cinta de correr (\`${WARMUP_ID}\`) de ${WARMUP_MINUTES} minutos se hace **todos los días**. Gymmy lo añade siempre; no lo incluyas en las rutinas.`,
+        ]
+      : []),
+    "- `notes` es opcional.",
+    "",
+    "Ejemplo del formato:",
+    "",
+    `\`\`\`${PLAN_FENCE}`,
+    example,
+    "```",
+  ];
+}

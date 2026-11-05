@@ -8,6 +8,7 @@ const props = defineProps<{
   exercise: Exercise;
   history: HistoryEntry[];
   values: Record<string, string>;
+  target?: string;
 }>();
 
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -151,6 +152,7 @@ function usePlaceholder(event: Event) {
         <strong class="variable-value">{{ item.value }}</strong>
       </span>
     </p>
+    <p v-if="target" class="target-line">Objetivo: {{ target }}</p>
   </div>
 
   <Teleport to="body">
@@ -306,6 +308,13 @@ function usePlaceholder(event: Event) {
   font-size: 20px;
   font-weight: 800;
   line-height: 1.1;
+}
+
+.target-line {
+  margin: 4px 0 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .editor-dialog {

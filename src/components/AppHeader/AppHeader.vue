@@ -8,6 +8,7 @@ defineProps<{
 const emit = defineEmits<{
   install: [];
   export: [];
+  "import-plan": [];
 }>();
 
 const today = computed(() =>
@@ -47,6 +48,14 @@ const today = computed(() =>
             @click="emit('export')"
           >
             Compartir datos con la IA
+          </button>
+          <button
+            class="install-button"
+            type="button"
+            aria-label="Pegar el plan de la IA desde el portapapeles"
+            @click="emit('import-plan')"
+          >
+            Pegar plan de la IA
           </button>
         </div>
       </div>

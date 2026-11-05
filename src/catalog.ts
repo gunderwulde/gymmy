@@ -203,3 +203,25 @@ export function sortByLatestUsage<T extends { id: string }>(
     })
     .map(({ exercise }) => exercise);
 }
+
+/** Los ejercicios de hoy primero (y, dentro de cada grupo, los pendientes antes). */
+export function sortForToday<T extends { id: string }>(
+  catalog: T[],
+  history: Array<{ exerciseId: string; date: string }>,
+  day: Date,
+  todayIds: Set<string> | null,
+): T[] {
+  if (!todayIds) return sortPendingFirst(catalog, history, day);
+  return [
+    ...sortPendingFirst(
+      catalog.filter((exercise) => todayIds.has(exercise.id)),
+      history,
+      day,
+    ),
+    ...sortPendingFirst(
+      catalog.filter((exercise) => !todayIds.has(exercise.id)),
+      history,
+      day,
+    ),
+  ];
+}

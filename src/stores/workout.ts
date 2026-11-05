@@ -4,14 +4,25 @@ import { latestEntry, loadCatalog, sortByLatestUsage } from "../catalog";
 import {
   addSetEntry,
   addTimeEntry,
+  applyPlanRecord,
+  loadPlanRecord,
   loadWorkoutData,
+  savePlanRecord,
   saveExerciseValue,
   saveTimerSession,
 } from "../storage/database";
+import {
+  activeRoutineId,
+  localDayKey,
+  todayExerciseIds,
+  type Plan,
+  type PlanRecord,
+} from "../plan";
 import { elapsedMilliseconds, formatElapsedTime } from "../timer";
 import {
   exerciseVariables,
   formatVariableValues,
+  parseVariableValue,
   parseVariableValues,
 } from "../variables";
 import type {
@@ -29,6 +40,7 @@ export const useWorkoutStore = defineStore("workout", () => {
   const history = ref<HistoryEntry[]>([]);
   const values = ref<Record<string, Record<string, string>>>({});
   const timer = ref<TimerState | null>(null);
+  const planRecord = ref<PlanRecord | null>(null);
   const now = ref(Date.now());
   const ready = ref(false);
   const blocked = ref(false);
@@ -38,6 +50,15 @@ export const useWorkoutStore = defineStore("workout", () => {
 
   const sortedCatalog = computed(() =>
     sortByLatestUsage(catalog.value, history.value),
+  );
+
+  const routineId = computed(() =>
+    planRecord.value ? activeRoutineId(planRecord.value, new Date()) : null,
+  );
+  const todayIds = computed(() =>
+    planRecord.value
+      ? todayExerciseIds(planRecord.value.plan, routineId.value)
+      : null,
   );
 
   function announce(text: string, isError = false) {
@@ -83,6 +104,7 @@ export const useWorkoutStore = defineStore("workout", () => {
         );
       }
       values.value = drafts;
+      planRecord.value = await loadPlanRecord();
       timer.value = data.timer
         ? {
             exerciseId: data.timer.exerciseId,
@@ -307,6 +329,69 @@ export const useWorkoutStore = defineStore("workout", () => {
     }
   }
 
+  /** Guarda el plan de la IA y sustituye los valores editados por los objetivos. */
+  async function applyPlan(plan: Plan): Promise<boolean> {
+    if (blocked.value) {
+      announce(
+        "El almacenamiento está bloqueado para proteger los datos dañados.",
+        true,
+      );
+      return false;
+    }
+    const drafts = { ...values.value };
+    const stored: ExerciseValue[] = [];
+    for (const exercise of catalog.value) {
+      const target = plan.targets[exercise.id];
+      const variables = exerciseVariables(exercise);
+      if (!target || !variables.length) continue;
+      const merged: Record<string, number> = {};
+      for (const variable of variables) {
+        merged[variable.var] =
+          target.values[variable.var] ??
+          parseVariableValue(
+            values.value[exercise.id]?.[variable.var] ?? "",
+            variable,
+          ) ??
+          variable.default;
+      }
+      stored.push({ exerciseId: exercise.id, values: merged });
+      drafts[exercise.id] = Object.fromEntries(
+        Object.entries(merged).map(([key, value]) => [key, String(value)]),
+      );
+    }
+    const record: PlanRecord = {
+      id: "current",
+      plan,
+      receivedAt: new Date().toISOString(),
+      override: null,
+    };
+    try {
+      await applyPlanRecord(record, stored);
+      values.value = drafts;
+      planRecord.value = record;
+      announce("Plan de la IA aplicado.");
+      return true;
+    } catch (error) {
+      announce(`No se pudo aplicar el plan: ${errorMessage(error)}`, true);
+      return false;
+    }
+  }
+
+  /** Elige a mano la rutina de hoy (`null` = solo calentamiento). */
+  async function selectRoutine(id: string | null): Promise<void> {
+    if (!planRecord.value) return;
+    const record: PlanRecord = {
+      ...planRecord.value,
+      override: { day: localDayKey(new Date()), routineId: id },
+    };
+    planRecord.value = record;
+    try {
+      await savePlanRecord(record);
+    } catch (error) {
+      announce(`No se pudo guardar la rutina: ${errorMessage(error)}`, true);
+    }
+  }
+
   function timerElapsed(exerciseId: string): number {
     if (timer.value?.exerciseId === exerciseId) {
       return elapsedMilliseconds(timer.value, now.value || Date.now());
@@ -326,6 +411,11 @@ export const useWorkoutStore = defineStore("workout", () => {
     message,
     messageIsError,
     sortedCatalog,
+    planRecord,
+    routineId,
+    todayIds,
+    applyPlan,
+    selectRoutine,
     load,
     updateDraft,
     saveDraft,
