@@ -3,14 +3,17 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useRegisterSW } from "virtual:pwa-register/vue";
 import AppHeader from "./components/AppHeader/AppHeader.vue";
 import ExerciseList from "./components/ExerciseList/ExerciseList.vue";
+import SharedDataDialog from "./components/SharedDataDialog/SharedDataDialog.vue";
 import UpdateBanner from "./components/UpdateBanner/UpdateBanner.vue";
 import { useWorkoutStore } from "./stores/workout";
 import { buildRoutineMarkdown, EXPORT_FILE_NAME } from "./exportMarkdown";
 import { shareMarkdown } from "./share";
+import { readSharedData, SHARE_PARAMS, type SharedData } from "./sharedData";
 
 const store = useWorkoutStore();
 const installable = ref(false);
 const updateDismissed = ref(false);
+const sharedData = ref<SharedData | null>(null);
 const { needRefresh, updateServiceWorker } = useRegisterSW();
 
 interface InstallPromptEvent extends Event {
@@ -62,7 +65,16 @@ async function exportRoutines() {
   }
 }
 
+function receiveSharedData() {
+  sharedData.value = readSharedData(window.location.search);
+  if (!sharedData.value) return;
+  const url = new URL(window.location.href);
+  for (const name of SHARE_PARAMS) url.searchParams.delete(name);
+  window.history.replaceState(null, "", url);
+}
+
 onMounted(() => {
+  receiveSharedData();
   void store.load();
   window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
   window.addEventListener("appinstalled", onAppInstalled);
@@ -90,6 +102,8 @@ function errorMessage(error: unknown): string {
       <ExerciseList />
     </main>
   </div>
+
+  <SharedDataDialog :data="sharedData" @close="sharedData = null" />
 
   <UpdateBanner
     :visible="needRefresh && !updateDismissed"

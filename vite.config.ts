@@ -54,6 +54,11 @@ export default defineConfig(({ mode }) => ({
         scope: "./",
         display: "standalone",
         orientation: "portrait-primary",
+        share_target: {
+          action: "./",
+          method: "GET",
+          params: { title: "title", text: "text", url: "url" },
+        },
         background_color: "#101612",
         theme_color: "#101612",
         icons: [

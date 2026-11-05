@@ -20,6 +20,7 @@ Reglas comunes para todos los componentes de la interfaz. Cada componente tiene 
 | [`ExerciseList`](./ExerciseList/README.md)           | Búsqueda, filtros y lista de ejercicios.                     |
 | [`ExerciseCardSets`](./ExerciseCardSets/README.md)   | La tarjeta abre el popup para editar y registrar series.     |
 | [`ExerciseCardTimed`](./ExerciseCardTimed/README.md) | Cronómetro y controles; la tarjeta abre el popup de edición. |
+| [`SharedDataDialog`](./SharedDataDialog/README.md)   | Aviso de datos recibidos desde otra app (share target).      |
 | [`UpdateBanner`](./UpdateBanner/README.md)           | Aviso de actualización disponible de la PWA.                 |
 
 ## Reglas

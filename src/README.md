@@ -8,7 +8,8 @@ Código de la aplicación. Complementa al [README.md](../README.md) raíz; en ca
 
 1. `AppHeader`: cabecera con marca, fecha, botón «Instalar» y botón «Compartir datos con la IA».
 2. `ExerciseList`: búsqueda, filtros y lista de ejercicios.
-3. `UpdateBanner`: aviso de nueva versión disponible.
+3. `SharedDataDialog`: aviso de datos recibidos por la hoja de compartir.
+4. `UpdateBanner`: aviso de nueva versión disponible.
 
 `App.vue` conecta los componentes entre sí (por ejemplo, el evento `export` de `AppHeader` genera el Markdown con `exportMarkdown.ts` y lo comparte con `share.ts`) y arranca la carga inicial del store. No importa componentes de ejercicio directamente: eso lo hace `ExerciseList`.
 
