@@ -144,6 +144,38 @@ export function latestEntry<T extends { exerciseId: string; date: string }>(
   return latest;
 }
 
+export function doneOnDay(
+  history: Array<{ exerciseId: string; date: string }>,
+  exerciseId: string,
+  day: Date,
+): boolean {
+  return history.some((entry) => {
+    if (entry.exerciseId !== exerciseId) return false;
+    const date = new Date(entry.date);
+    return (
+      date.getFullYear() === day.getFullYear() &&
+      date.getMonth() === day.getMonth() &&
+      date.getDate() === day.getDate()
+    );
+  });
+}
+
+export function sortPendingFirst<T extends { id: string }>(
+  catalog: T[],
+  history: Array<{ exerciseId: string; date: string }>,
+  day: Date,
+): T[] {
+  const done = new Set(
+    catalog
+      .filter((exercise) => doneOnDay(history, exercise.id, day))
+      .map((exercise) => exercise.id),
+  );
+  return [
+    ...catalog.filter((exercise) => !done.has(exercise.id)),
+    ...catalog.filter((exercise) => done.has(exercise.id)),
+  ];
+}
+
 export function sortByLatestUsage<T extends { id: string }>(
   catalog: T[],
   history: Array<{ exerciseId: string; date: string }>,

@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
-import {
-  exerciseVariables,
-  formatVariableValues,
-  parseVariableValue,
-} from "../../variables";
-import type { Exercise, SetEntry } from "../../types";
+import { exerciseVariables, parseVariableValue } from "../../variables";
+import ExerciseProgress from "../ExerciseProgress/ExerciseProgress.vue";
+import type { Exercise, HistoryEntry } from "../../types";
 
 const props = defineProps<{
   exercise: Exercise;
-  lastEntry: SetEntry | null;
+  history: HistoryEntry[];
   values: Record<string, string>;
 }>();
 
@@ -20,7 +17,6 @@ const emit = defineEmits<{
   "update:value": [value: { variable: string; value: string }];
   commit: [];
   done: [];
-  "open-history": [opener: HTMLElement];
 }>();
 
 const variables = computed(() => exerciseVariables(props.exercise));
@@ -54,16 +50,6 @@ const errors = computed(
     ) as Record<string, string>,
 );
 
-const lastSession = computed(() => {
-  if (!props.lastEntry) return "Aún no has registrado este ejercicio";
-  const date = new Intl.DateTimeFormat("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(props.lastEntry.date));
-  const result = formatVariableValues(variables.value, props.lastEntry.values);
-  return `Última vez: ${date}${result ? ` · ${result}` : ""}`;
-});
 const imageUrl = computed(
   () => `${import.meta.env.BASE_URL}${props.exercise.image}`,
 );
@@ -136,8 +122,8 @@ function usePlaceholder(event: Event) {
     class="exercise-image"
     :src="imageUrl"
     :alt="`${exercise.name}, ilustración`"
-    width="82"
-    height="82"
+    width="72"
+    height="72"
     loading="lazy"
     @error="usePlaceholder"
   />
@@ -154,20 +140,6 @@ function usePlaceholder(event: Event) {
     <span class="muscle-label">{{
       groupNames[exercise.muscleGroup] ?? exercise.muscleGroup
     }}</span>
-    <div class="last-session-row">
-      <p class="last-session" :class="{ 'no-session': !lastEntry }">
-        {{ lastSession }}
-      </p>
-      <button
-        v-if="lastEntry"
-        class="history-shortcut"
-        type="button"
-        :aria-label="`Ver progreso de ${exercise.name}`"
-        @click="emit('open-history', $event.currentTarget as HTMLElement)"
-      >
-        Progreso
-      </button>
-    </div>
 
     <p class="variable-summary">
       <span
@@ -206,6 +178,7 @@ function usePlaceholder(event: Event) {
           </svg>
         </button>
       </div>
+      <ExerciseProgress :exercise="exercise" :history="history" />
       <div class="entry-controls">
         <label
           v-for="variable in variables"
@@ -251,8 +224,8 @@ function usePlaceholder(event: Event) {
 
 <style scoped>
 .exercise-image {
-  width: 82px;
-  height: 82px;
+  width: 72px;
+  height: 72px;
   align-self: start;
   object-fit: cover;
   border-radius: 11px;
@@ -264,7 +237,6 @@ function usePlaceholder(event: Event) {
 }
 
 .exercise-title-row {
-  min-height: 36px;
   display: flex;
   justify-content: space-between;
   align-items: start;
@@ -297,42 +269,9 @@ function usePlaceholder(event: Event) {
 
 .muscle-label {
   display: block;
-  margin: 4px 0 10px;
+  margin: 2px 0 6px;
   color: var(--muted);
   font-size: 10px;
-}
-
-.last-session-row {
-  min-height: 25px;
-  display: flex;
-  align-items: start;
-  gap: 8px;
-}
-
-.last-session {
-  min-height: 15px;
-  margin: 0 0 10px;
-  color: #a8b79e;
-  font-size: 10px;
-  line-height: 1.4;
-}
-
-.last-session.no-session {
-  color: #77837a;
-}
-
-.history-shortcut {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  cursor: pointer;
-  font-size: 10px;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .variable-summary {
@@ -474,6 +413,9 @@ function usePlaceholder(event: Event) {
 }
 
 .done-button {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 220px);
   height: 35px;
   padding: 0 10px;
   display: inline-flex;
@@ -506,8 +448,8 @@ function usePlaceholder(event: Event) {
 
 @media (max-width: 480px) {
   .exercise-image {
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
   }
 
   .exercise-name {
@@ -515,11 +457,6 @@ function usePlaceholder(event: Event) {
   }
 
   .muscle-label,
-  .last-session,
-  .history-shortcut {
-    font-size: 12px;
-  }
-
   .variable-summary {
     gap: 10px;
   }
@@ -530,11 +467,6 @@ function usePlaceholder(event: Event) {
 
   .variable-value {
     font-size: 22px;
-  }
-
-  .history-shortcut {
-    min-height: 32px;
-    padding-inline: 4px;
   }
 
   .editor-dialog {
@@ -565,7 +497,6 @@ function usePlaceholder(event: Event) {
   }
 
   .done-button {
-    grid-column: 1 / -1;
     height: 50px;
     padding-inline: 8px;
     font-size: 15px;

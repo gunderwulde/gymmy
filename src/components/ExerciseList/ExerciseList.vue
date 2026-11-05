@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, type ComponentPublicInstance } from "vue";
-import { latestEntry, exerciseZone } from "../../catalog";
+import { doneOnDay, exerciseZone, sortPendingFirst } from "../../catalog";
 import { useWorkoutStore } from "../../stores/workout";
-import type { Exercise, ExerciseZone, SetEntry, TimeEntry } from "../../types";
+import type { Exercise, ExerciseZone, HistoryEntry } from "../../types";
 import ExerciseCardSets from "../ExerciseCardSets/ExerciseCardSets.vue";
 import ExerciseCardTimed from "../ExerciseCardTimed/ExerciseCardTimed.vue";
-
-const emit = defineEmits<{
-  "open-history": [opener: HTMLElement, exerciseId: string];
-}>();
 
 const filters: Array<{ id: ExerciseZone; label: string }> = [
   { id: "all", label: "Todos" },
@@ -26,7 +22,12 @@ type CardEditor = {
 const cardEditors = new Map<string, CardEditor>();
 
 const filteredExercises = computed(() => {
-  return store.sortedCatalog.filter((exercise) => {
+  const ordered = sortPendingFirst(
+    store.sortedCatalog,
+    store.history,
+    new Date(),
+  );
+  return ordered.filter((exercise) => {
     return (
       selectedZone.value === "all" ||
       exerciseZone(exercise.muscleGroup) === selectedZone.value
@@ -34,14 +35,22 @@ const filteredExercises = computed(() => {
   });
 });
 
-function latestSet(exercise: Exercise): SetEntry | null {
-  const entry = latestEntry(store.history, exercise.id);
-  return entry && entry.mode !== "time" ? entry : null;
+const historyByExercise = computed(() => {
+  const map = new Map<string, HistoryEntry[]>();
+  for (const entry of store.history) {
+    const list = map.get(entry.exerciseId);
+    if (list) list.push(entry);
+    else map.set(entry.exerciseId, [entry]);
+  }
+  return map;
+});
+
+function exerciseHistory(exerciseId: string): HistoryEntry[] {
+  return historyByExercise.value.get(exerciseId) ?? [];
 }
 
-function latestTime(exercise: Exercise): TimeEntry | null {
-  const entry = latestEntry(store.history, exercise.id);
-  return entry?.mode === "time" ? entry : null;
+function isDoneToday(exercise: Exercise): boolean {
+  return doneOnDay(store.history, exercise.id, new Date());
 }
 
 function setCardEditor(
@@ -121,10 +130,6 @@ async function finishTimer() {
     )
     ?.focus();
 }
-
-function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
-  emit("open-history", opener, exerciseId);
-}
 </script>
 
 <template>
@@ -170,16 +175,17 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
         :id="`exercise-${exercise.id}`"
         :key="exercise.id"
         class="exercise-card"
+        :class="{ 'is-done-today': isDoneToday(exercise) }"
         :data-exercise-id="exercise.id"
       >
         <button
           class="card-activation"
           type="button"
-          :aria-label="
+          :aria-label="`${
             exercise.tracking === 'time'
               ? `Editar datos de ${exercise.name}`
               : `Editar variables y registrar ${exercise.name}`
-          "
+          }${isDoneToday(exercise) ? ' (hecho hoy)' : ''}`"
           aria-haspopup="dialog"
           data-action="configure"
           @click="openCardEditor(exercise.id, $event)"
@@ -188,7 +194,7 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
           v-if="exercise.tracking !== 'time'"
           :ref="(editor) => setCardEditor(exercise.id, editor)"
           :exercise="exercise"
-          :last-entry="latestSet(exercise)"
+          :history="exerciseHistory(exercise.id)"
           :values="store.values[exercise.id] ?? {}"
           @update:value="
             ({ variable, value }) =>
@@ -196,13 +202,12 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
           "
           @commit="store.saveDraft(exercise.id)"
           @done="recordSet(exercise)"
-          @open-history="openExerciseHistory(exercise.id, $event)"
         />
         <ExerciseCardTimed
           v-else
           :ref="(editor) => setCardEditor(exercise.id, editor)"
           :exercise="exercise"
-          :last-entry="latestTime(exercise)"
+          :history="exerciseHistory(exercise.id)"
           :values="store.values[exercise.id] ?? {}"
           :elapsed-ms="store.timerElapsed(exercise.id)"
           :status="
@@ -224,7 +229,6 @@ function openExerciseHistory(exerciseId: string, opener: HTMLElement) {
           @pause="pauseTimer"
           @resume="resumeTimer"
           @finish="finishTimer"
-          @open-history="openExerciseHistory(exercise.id, $event)"
         />
       </article>
     </div>
@@ -305,7 +309,7 @@ h2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: max-content;
   align-content: start;
-  gap: 12px;
+  gap: 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -314,16 +318,21 @@ h2 {
 .exercise-card {
   position: relative;
   min-width: 0;
-  padding: 14px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
   transition:
     border-color 0.18s,
     transform 0.18s;
+}
+
+.exercise-card.is-done-today {
+  border-color: #6b3a35;
+  background: #2b1a19;
 }
 
 .card-activation {
@@ -348,6 +357,10 @@ h2 {
   .exercise-card:hover {
     border-color: #435447;
     transform: translateY(-1px);
+  }
+
+  .exercise-card.is-done-today:hover {
+    border-color: #8a4a43;
   }
 }
 
@@ -411,9 +424,9 @@ h2 {
   }
 
   .exercise-card {
-    padding: 12px;
-    gap: 12px;
-    grid-template-columns: 72px minmax(0, 1fr);
+    padding: 10px;
+    gap: 10px;
+    grid-template-columns: 64px minmax(0, 1fr);
   }
 }
 

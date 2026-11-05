@@ -1,10 +1,12 @@
 import { readFile, readdir } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import {
+  doneOnDay,
   exerciseZone,
   latestEntry,
   loadCatalog,
   sortByLatestUsage,
+  sortPendingFirst,
   validateCatalog,
 } from "../src/catalog";
 import type { Exercise } from "../src/types";
@@ -102,5 +104,31 @@ describe("catálogo", () => {
       "cinta-correr",
       "pec-deck",
     ]);
+  });
+
+  it("detecta si un ejercicio se hizo en el día indicado", () => {
+    const entries = [
+      { exerciseId: "pec-deck", date: new Date(2026, 0, 2, 10).toISOString() },
+      {
+        exerciseId: "remo-sentado",
+        date: new Date(2026, 0, 3, 9).toISOString(),
+      },
+    ];
+    const day = new Date(2026, 0, 2, 22);
+    expect(doneOnDay(entries, "pec-deck", day)).toBe(true);
+    expect(doneOnDay(entries, "remo-sentado", day)).toBe(false);
+    expect(doneOnDay(entries, "jalon-polea", day)).toBe(false);
+  });
+
+  it("deja los pendientes primero y los hechos hoy al final, sin alterar el orden previo", () => {
+    const day = new Date(2026, 0, 2, 12);
+    const entries = [
+      { exerciseId: "a", date: new Date(2026, 0, 2, 9).toISOString() },
+      { exerciseId: "c", date: new Date(2026, 0, 1, 9).toISOString() },
+    ];
+    const items = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
+    expect(
+      sortPendingFirst(items, entries, day).map((item) => item.id),
+    ).toEqual(["b", "c", "d", "a"]);
   });
 });
