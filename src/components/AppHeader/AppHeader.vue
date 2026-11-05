@@ -49,10 +49,10 @@ const today = computed(() =>
             @click="emit('export')"
           >
             <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-              <circle cx="18" cy="5" r="2.5" />
-              <circle cx="6" cy="12" r="2.5" />
-              <circle cx="18" cy="19" r="2.5" />
-              <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+              <path
+                d="M10 4c.8 4.6 2.4 6.2 7 7-4.6.8-6.2 2.4-7 7-.8-4.6-2.4-6.2-7-7 4.6-.8 6.2-2.4 7-7Z"
+              />
+              <path d="M18.5 3v4M16.5 5h4M18 17v3M16.5 18.5h3" />
             </svg>
           </button>
           <button
