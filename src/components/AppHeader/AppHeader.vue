@@ -7,7 +7,7 @@ defineProps<{
 
 const emit = defineEmits<{
   install: [];
-  export: [asText: boolean];
+  export: [];
 }>();
 
 const today = computed(() =>
@@ -43,18 +43,10 @@ const today = computed(() =>
           <button
             class="install-button"
             type="button"
-            aria-label="Compartir rutinas como archivo Markdown con una IA"
-            @click="emit('export', false)"
+            aria-label="Compartir datos con la IA"
+            @click="emit('export')"
           >
-            Compartir .md
-          </button>
-          <button
-            class="install-button"
-            type="button"
-            aria-label="Compartir rutinas como texto con una IA"
-            @click="emit('export', true)"
-          >
-            Texto
+            Compartir datos con la IA
           </button>
         </div>
       </div>

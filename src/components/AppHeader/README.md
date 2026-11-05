@@ -6,7 +6,7 @@ Cabecera de la aplicación: un único bloque (hero) con la marca y la fecha.
 
 - Marca: icono «G» y texto `gymmy.` (título `h1` con enlace de inicio y `aria-label`).
 - Botón «Instalar»: solo visible cuando el navegador permite instalar la PWA.
-- Botones «Compartir .md» y «Texto»: piden exportar las rutinas como archivo Markdown o como texto plano.
+- Botón «Compartir datos con la IA»: pide exportar las rutinas como texto Markdown.
 - Insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`), a la derecha. Es `aria-hidden`.
 
 ## Interfaz
@@ -15,10 +15,10 @@ Cabecera de la aplicación: un único bloque (hero) con la marca y la fecha.
 | ------------- | --------- | ---------------------------- |
 | `installable` | `boolean` | Muestra el botón «Instalar». |
 
-| Evento    | Carga                           | Cuándo                               |
-| --------- | ------------------------------- | ------------------------------------ |
-| `install` | —                               | Al pulsar «Instalar».                |
-| `export`  | `boolean` (`true` = como texto) | Al pulsar «Compartir .md» o «Texto». |
+| Evento    | Carga | Cuándo                                 |
+| --------- | ----- | -------------------------------------- |
+| `install` | —     | Al pulsar «Instalar».                  |
+| `export`  | —     | Al pulsar «Compartir datos con la IA». |
 
 ## Reglas
 

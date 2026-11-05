@@ -6,7 +6,7 @@ Código de la aplicación. Complementa al [README.md](../README.md) raíz; en ca
 
 [`App.vue`](./App.vue) es **solo un contenedor**: no contiene lógica de negocio ni marcado de ejercicios. Su única responsabilidad es componer, en este orden:
 
-1. `AppHeader`: cabecera con marca, fecha, botón «Instalar» y botones de exportación.
+1. `AppHeader`: cabecera con marca, fecha, botón «Instalar» y botón «Compartir datos con la IA».
 2. `ExerciseList`: búsqueda, filtros y lista de ejercicios.
 3. `UpdateBanner`: aviso de nueva versión disponible.
 

@@ -1,5 +1,4 @@
-export type ShareResult =
-  "shared-file" | "shared-text" | "downloaded" | "cancelled";
+export type ShareResult = "shared" | "downloaded" | "cancelled";
 
 interface ShareDeps {
   nav?: Navigator;
@@ -7,26 +6,20 @@ interface ShareDeps {
 }
 
 /**
- * Comparte el Markdown con la hoja nativa del sistema. Orden de preferencia:
- * archivo .md → texto plano → descarga del archivo. Debe llamarse desde un
- * gesto del usuario (clic) y en contexto seguro (HTTPS).
+ * Comparte el Markdown como texto con la hoja nativa del sistema. Si no está
+ * disponible, descarga el archivo. Debe llamarse desde un gesto del usuario
+ * (clic) y en contexto seguro (HTTPS).
  */
 export async function shareMarkdown(
   fileName: string,
   title: string,
   content: string,
-  asText = false,
   { nav = navigator, doc = document }: ShareDeps = {},
 ): Promise<ShareResult> {
-  const file = new File([content], fileName, { type: "text/markdown" });
   try {
     if (typeof nav.share === "function") {
-      if (!asText && nav.canShare?.({ files: [file] })) {
-        await nav.share({ files: [file], title });
-        return "shared-file";
-      }
       await nav.share({ title, text: content });
-      return "shared-text";
+      return "shared";
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -34,6 +27,7 @@ export async function shareMarkdown(
     }
     // Si el sistema rechaza compartir, se cae a la descarga.
   }
+  const file = new File([content], fileName, { type: "text/markdown" });
   const url = URL.createObjectURL(file);
   const link = doc.createElement("a");
   link.href = url;

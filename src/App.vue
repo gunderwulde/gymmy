@@ -46,14 +46,13 @@ async function installApp() {
   }
 }
 
-async function exportRoutines(asText: boolean) {
+async function exportRoutines() {
   const markdown = buildRoutineMarkdown(store.catalog, store.history);
   try {
     const result = await shareMarkdown(
       EXPORT_FILE_NAME,
       "Mis rutinas de Gymmy",
       markdown,
-      asText,
     );
     if (result === "downloaded") {
       store.announce("Archivo .md descargado: adjúntalo en tu app de IA.");
