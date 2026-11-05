@@ -37,12 +37,10 @@ Los filtros son **Todos**, **Superiores**, **Inferiores** y **Cardio** (sustituy
 
 ## Orden
 
-Se mantiene el orden por último uso: primero la actividad más reciente; las que no tienen historial quedan al final en su orden original. Se reordena tras cada registro. El filtro no altera el criterio de orden.
+Se ordenan primero los ejercicios pendientes de hoy y después los ya hechos hoy (que se tiñen de rojizo); dentro de cada grupo, por último uso. Se reordena tras cada registro. El filtro no altera el criterio de orden.
 
 ## Interfaz
 
 Lee del store y no recibe props obligatorias. Cada tarjeta se identifica con `id="exercise-<id>"` para poder devolverle el foco tras registrar.
 
-| Evento (de las tarjetas) | Gestión                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `open-history`           | Se reenvía al contenedor con el `id` del ejercicio, para abrir `HistoryDialog` filtrado. |
+Pasa a cada tarjeta su historial para la gráfica de progreso del popup. Al registrar una serie se cierra el popup.

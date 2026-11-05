@@ -5,6 +5,8 @@ import AppHeader from "./components/AppHeader/AppHeader.vue";
 import ExerciseList from "./components/ExerciseList/ExerciseList.vue";
 import UpdateBanner from "./components/UpdateBanner/UpdateBanner.vue";
 import { useWorkoutStore } from "./stores/workout";
+import { buildRoutineMarkdown, EXPORT_FILE_NAME } from "./exportMarkdown";
+import { shareMarkdown } from "./share";
 
 const store = useWorkoutStore();
 const installable = ref(false);
@@ -44,6 +46,23 @@ async function installApp() {
   }
 }
 
+async function exportRoutines(asText: boolean) {
+  const markdown = buildRoutineMarkdown(store.catalog, store.history);
+  try {
+    const result = await shareMarkdown(
+      EXPORT_FILE_NAME,
+      "Mis rutinas de Gymmy",
+      markdown,
+      asText,
+    );
+    if (result === "downloaded") {
+      store.announce("Archivo .md descargado: adjúntalo en tu app de IA.");
+    }
+  } catch (error) {
+    store.announce(`No se pudo exportar: ${errorMessage(error)}`, true);
+  }
+}
+
 onMounted(() => {
   void store.load();
   window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
@@ -63,7 +82,11 @@ function errorMessage(error: unknown): string {
 
 <template>
   <div class="app-shell">
-    <AppHeader :installable="installable" @install="installApp" />
+    <AppHeader
+      :installable="installable"
+      @install="installApp"
+      @export="exportRoutines"
+    />
     <main>
       <ExerciseList />
     </main>

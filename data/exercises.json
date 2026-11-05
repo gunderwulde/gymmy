@@ -27,6 +27,15 @@
     "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 10 }
   },
   {
+    "id": "extension-lumbar",
+    "name": "Extensión lumbar",
+    "type": "machine",
+    "muscleGroup": "back",
+    "image": "assets/exercises/lumbares.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 30 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
     "id": "press-hombros",
     "name": "Press de hombros",
     "type": "machine",
@@ -86,6 +95,24 @@
     "type": "machine",
     "muscleGroup": "legs",
     "image": "assets/exercises/extension-pierna.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "abdominales-maquina",
+    "name": "Abdominales en máquina",
+    "type": "machine",
+    "muscleGroup": "core",
+    "image": "assets/exercises/abdominales-maquina.webp",
+    "v1": { "var": "peso", "txt": "Peso (kg)", "default": 25 },
+    "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
+  },
+  {
+    "id": "extension-brazos",
+    "name": "Extensión de brazos",
+    "type": "machine",
+    "muscleGroup": "arms",
+    "image": "assets/exercises/extension-brazos.webp",
     "v1": { "var": "peso", "txt": "Peso (kg)", "default": 20 },
     "v2": { "var": "repeticiones", "txt": "Repeticiones", "default": 12 }
   },

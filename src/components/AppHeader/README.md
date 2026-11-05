@@ -1,37 +1,27 @@
 # `AppHeader`
 
-Cabecera de la aplicación. Se corresponde con la captura de referencia del diseño: barra superior y, debajo, el bloque de bienvenida.
+Cabecera de la aplicación: un único bloque (hero) con la marca y la fecha.
 
 ## Contenido
 
-**Barra superior**
-
-- Marca: icono «G» y texto `gymmy.` (enlace de inicio con `aria-label`).
-- Estado de conexión: punto de color y texto «En línea» / «Sin conexión».
+- Marca: icono «G» y texto `gymmy.` (título `h1` con enlace de inicio y `aria-label`).
 - Botón «Instalar»: solo visible cuando el navegador permite instalar la PWA.
-- Botón «Progreso» con icono: abre el historial.
-
-**Bloque de bienvenida (hero)**
-
-- Disposición compacta: el título «Un día más. / Un poco más fuerte.» (segunda línea en color de acento) y el texto de apoyo «Apunta tus series. La próxima vez, sabrás exactamente dónde lo dejaste.» quedan a la izquierda.
-- La insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`) queda arriba a la derecha, con margen, sin círculos decorativos y sin solaparse con el texto. El conjunto de título y texto de apoyo no supera la altura de la insignia. Es `aria-hidden`.
+- Botones «Compartir .md» y «Texto»: piden exportar las rutinas como archivo Markdown o como texto plano.
+- Insignia circular «HOY» con la fecha actual en formato corto (p. ej. `09 OCT`), a la derecha. Es `aria-hidden`.
 
 ## Interfaz
 
 | Prop          | Tipo      | Descripción                  |
 | ------------- | --------- | ---------------------------- |
-| `online`      | `boolean` | Estado de conexión mostrado. |
 | `installable` | `boolean` | Muestra el botón «Instalar». |
 
-| Evento         | Carga                    | Cuándo                |
-| -------------- | ------------------------ | --------------------- |
-| `open-history` | `HTMLElement` (el botón) | Al pulsar «Progreso». |
-| `install`      | —                        | Al pulsar «Instalar». |
-
-El evento `open-history` entrega el botón que lo originó para que el contenedor pueda devolverle el foco al cerrar el diálogo.
+| Evento    | Carga                           | Cuándo                               |
+| --------- | ------------------------------- | ------------------------------------ |
+| `install` | —                               | Al pulsar «Instalar».                |
+| `export`  | `boolean` (`true` = como texto) | Al pulsar «Compartir .md» o «Texto». |
 
 ## Reglas
 
-- No accede al store: recibe todo por props y emite eventos.
+- No accede al store: recibe todo por props y emite eventos. `App.vue` genera y comparte el Markdown.
 - La fecha de «HOY» se calcula con `Intl.DateTimeFormat("es-ES")`.
-- Es responsive: en pantallas estrechas la decoración se recorta y el texto del estado de conexión se oculta, dejando solo el punto.
+- Es responsive: en pantallas bajas se reducen márgenes y tamaños.

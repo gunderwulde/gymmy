@@ -6,12 +6,11 @@ Código de la aplicación. Complementa al [README.md](../README.md) raíz; en ca
 
 [`App.vue`](./App.vue) es **solo un contenedor**: no contiene lógica de negocio ni marcado de ejercicios. Su única responsabilidad es componer, en este orden:
 
-1. `AppHeader`: cabecera con marca, estado, botón «Progreso» y bloque de bienvenida.
+1. `AppHeader`: cabecera con marca, fecha, botón «Instalar» y botones de exportación.
 2. `ExerciseList`: búsqueda, filtros y lista de ejercicios.
-3. `HistoryDialog`: ventana emergente con el progreso (fuera del flujo visual, abierta desde la cabecera).
-4. `UpdateBanner`: aviso de nueva versión disponible.
+3. `UpdateBanner`: aviso de nueva versión disponible.
 
-`App.vue` conecta los componentes entre sí (por ejemplo, el evento de «Progreso» de `AppHeader` abre `HistoryDialog`) y arranca la carga inicial del store. No importa componentes de ejercicio directamente: eso lo hace `ExerciseList`.
+`App.vue` conecta los componentes entre sí (por ejemplo, el evento `export` de `AppHeader` genera el Markdown con `exportMarkdown.ts` y lo comparte con `share.ts`) y arranca la carga inicial del store. No importa componentes de ejercicio directamente: eso lo hace `ExerciseList`.
 
 ## Distribución móvil
 

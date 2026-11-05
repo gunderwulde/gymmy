@@ -7,6 +7,7 @@ defineProps<{
 
 const emit = defineEmits<{
   install: [];
+  export: [asText: boolean];
 }>();
 
 const today = computed(() =>
@@ -30,14 +31,32 @@ const today = computed(() =>
             <span>gymmy<span class="brand-period">.</span></span>
           </a>
         </h1>
-        <button
-          v-if="installable"
-          class="install-button"
-          type="button"
-          @click="emit('install')"
-        >
-          Instalar
-        </button>
+        <div class="hero-actions">
+          <button
+            v-if="installable"
+            class="install-button"
+            type="button"
+            @click="emit('install')"
+          >
+            Instalar
+          </button>
+          <button
+            class="install-button"
+            type="button"
+            aria-label="Compartir rutinas como archivo Markdown con una IA"
+            @click="emit('export', false)"
+          >
+            Compartir .md
+          </button>
+          <button
+            class="install-button"
+            type="button"
+            aria-label="Compartir rutinas como texto con una IA"
+            @click="emit('export', true)"
+          >
+            Texto
+          </button>
+        </div>
       </div>
       <div class="hero-decoration" aria-hidden="true">
         <span class="hero-badge"
@@ -108,6 +127,12 @@ const today = computed(() =>
 
 .brand-period {
   color: var(--accent);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .install-button {

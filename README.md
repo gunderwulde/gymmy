@@ -11,7 +11,8 @@ Publicada en <https://gunderwulde.github.io/gymmy/>.
 - Al pulsar «Hecho» se guarda en el historial una entrada por ejercicio con fecha y hora ISO, con los valores identificados por sus claves estables. Si ya existe una serie del mismo ejercicio en el mismo día (día local), se sobrescribe con los nuevos valores; las entradas de otros días no se tocan.
 - Cada variable se inicializa con el valor editado guardado; si no existe, usa el último valor registrado para su clave y, en su defecto, el `default` del catálogo. El recordatorio muestra los valores con sus etiquetas y fecha.
 - El catálogo se ordena por última fecha de uso, primero la actividad más reciente; las que no tienen historial quedan al final en el orden original. Se reordena tras cada registro completado.
-- Un botón de progreso abre una ventana emergente (`<dialog>`) con el historial agrupado por día, del más reciente al más antiguo, con filtro por ejercicio y los valores registrados con sus etiquetas.
+- El popup de cada ejercicio muestra arriba una gráfica de su progreso (1RM estimado como media de Epley y Brzycki con un máximo de 12 repeticiones, o duración en minutos para actividades temporizadas; un punto por día con el mejor valor). Las tarjetas de ejercicios ya hechos hoy se tiñen de rojizo y se ordenan al final.
+- Desde la cabecera, «Compartir .md» y «Texto» exportan un informe en Markdown (resumen, evolución y últimas sesiones por ejercicio, con una petición para que una IA sugiera mejoras) mediante la hoja de compartir del sistema (Web Share API, requiere HTTPS); si no está disponible, se descarga el archivo.
 - Las actividades temporizadas (cinta de correr, bicicleta estática) muestran `HH:MM:SS`. El tiempo se calcula con timestamps de reloj (`Date.now()` en milisegundos), no contando intervalos: mientras está en marcha se conserva el timestamp de inicio y se muestra el tiempo acumulado más la diferencia hasta ahora. Así, al reanudar la app después de que el móvil haya quedado en reposo, el tiempo transcurrido se actualiza correctamente. Al pausar, se suma el tramo transcurrido al acumulado y se guarda; al reanudar, se toma un nuevo timestamp de inicio sin perder lo acumulado. Al finalizar, se suma el último tramo y se guarda la duración. La cinta registra inclinación en porcentaje y la bicicleta resistencia. Solo puede haber una actividad temporizada en marcha a la vez.
 - Las máquinas se distinguen visualmente de los ejercicios libres (etiqueta en la tarjeta). La lista se filtra por zona (Todos, Superiores, Inferiores y Cardio) y se puede buscar por nombre o grupo muscular.
 
@@ -26,7 +27,7 @@ Publicada en <https://gunderwulde.github.io/gymmy/>.
 
 - `index.html`, `styles.css`, `vite.config.ts` y configuración TypeScript en la raíz.
 - `src/`: interfaz Vue, store Pinia, validación y orden del catálogo, persistencia Dexie y lógica del cronómetro.
-- Interfaz dividida en componentes, cada uno en su directorio con su README (ver `src/README.md` y `src/components/README.md`): `App.vue` es un contenedor que compone `AppHeader` y `ExerciseList`, más `HistoryDialog` y `UpdateBanner`. `ExerciseList` usa `ExerciseCardSets` para ejercicios por series y `ExerciseCardTimed` para actividades temporizadas.
+- Interfaz dividida en componentes, cada uno en su directorio con su README (ver `src/README.md` y `src/components/README.md`): `App.vue` es un contenedor que compone `AppHeader` y `ExerciseList`, más `UpdateBanner`. `ExerciseList` usa `ExerciseCardSets` para ejercicios por series y `ExerciseCardTimed` para actividades temporizadas.
 - `data/exercises.json`, `assets/exercises/` y `assets/icons/`.
 - Vite copia el catálogo y todos los recursos locales a la salida de producción para incluirlos en el precaché completo de Workbox.
 
@@ -76,9 +77,9 @@ Máquinas y ejercicios típicos agrupados por zona (pecho, espalda, hombros, bra
 
 - Diseño adaptable y táctil, con controles legibles en pantallas pequeñas.
 - Cada variable del catálogo se muestra como un campo numérico con `txt` como etiqueta dentro del popup de la tarjeta; los valores vacíos, negativos o no numéricos no se guardan, y se acepta la coma decimal. Repeticiones es un entero ≥ 1.
-- Los diálogos de las tarjetas se abren y cierran con teclado, tienen un título accesible y devuelven el foco a la tarjeta que los abrió. Los botones propios de las tarjetas (progreso, iniciar, pausar, reanudar y finalizar) mantienen su acción y no abren el popup al activarse.
+- Los diálogos de las tarjetas se abren y cierran con teclado, tienen un título accesible y devuelven el foco a la tarjeta que los abrió. Los botones propios de las tarjetas (iniciar, pausar, reanudar y finalizar) mantienen su acción y no abren el popup al activarse.
 - Ilustraciones con `loading="lazy"`, dimensiones fijas y a la izquierda del nombre, con texto alternativo útil; si falta una imagen se muestra un reemplazo local.
-- El popup de progreso se abre y cierra con teclado, tiene título accesible y devuelve el foco al control que lo abrió.
+- La gráfica de progreso es accesible por teclado (flechas, Inicio, Fin) e incluye una tabla equivalente oculta visualmente.
 - El resultado de guardar un registro y los errores se comunican de forma visible.
 
 ## Pruebas y calidad

@@ -9,7 +9,6 @@ Para toda entrada del catálogo con `tracking: "time"`. `ExerciseList` elige est
 ## Contenido
 
 - Ilustración, nombre, etiqueta del tipo y grupo muscular, igual que en [`ExerciseCardSets`](../ExerciseCardSets/README.md).
-- Línea de recordatorio: «Última vez: 09/10/2026 · 00:30:00» o «Aún no has registrado este ejercicio».
 - Tiempo transcurrido en formato `HH:MM:SS` (elemento `<output>`, `aria-label="Tiempo transcurrido en <nombre>"`, `aria-live="off"` para no saturar a lectores de pantalla).
 - Si el ejercicio incluye `v1`, muestra su valor actual como texto de solo lectura junto al cronómetro. La cinta de correr define «Inclinación (%)» con inicial `0`; la bicicleta estática, «Resistencia» con inicial `1`. Sin `v1`, muestra solo el temporizador.
 - Al pulsar la tarjeta fuera de sus botones se abre el popup para editar `v1`. La información no es un botón ni lleva una etiqueta «Editar».

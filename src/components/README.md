@@ -16,11 +16,10 @@ Reglas comunes para todos los componentes de la interfaz. Cada componente tiene 
 
 | Componente                                           | Qué es                                                       |
 | ---------------------------------------------------- | ------------------------------------------------------------ |
-| [`AppHeader`](./AppHeader/README.md)                 | Cabecera: barra superior y bloque de bienvenida.             |
+| [`AppHeader`](./AppHeader/README.md)                 | Cabecera: marca, fecha, instalar y exportar a Markdown.      |
 | [`ExerciseList`](./ExerciseList/README.md)           | Búsqueda, filtros y lista de ejercicios.                     |
 | [`ExerciseCardSets`](./ExerciseCardSets/README.md)   | La tarjeta abre el popup para editar y registrar series.     |
 | [`ExerciseCardTimed`](./ExerciseCardTimed/README.md) | Cronómetro y controles; la tarjeta abre el popup de edición. |
-| [`HistoryDialog`](./HistoryDialog/README.md)         | Ventana emergente con el historial de progreso.              |
 | [`UpdateBanner`](./UpdateBanner/README.md)           | Aviso de actualización disponible de la PWA.                 |
 
 ## Reglas
