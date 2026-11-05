@@ -42,20 +42,29 @@ const today = computed(() =>
             Instalar
           </button>
           <button
-            class="install-button"
+            class="install-button icon-button"
             type="button"
+            title="Compartir datos con la IA"
             aria-label="Compartir datos con la IA"
             @click="emit('export')"
           >
-            Compartir datos con la IA
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="18" cy="5" r="2.5" />
+              <circle cx="6" cy="12" r="2.5" />
+              <circle cx="18" cy="19" r="2.5" />
+              <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+            </svg>
           </button>
           <button
-            class="install-button"
+            class="install-button icon-button"
             type="button"
+            title="Pegar plan de la IA"
             aria-label="Pegar el plan de la IA desde el portapapeles"
             @click="emit('import-plan')"
           >
-            Pegar plan de la IA
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M12 4v12M6.5 11 12 16.5 17.5 11M5 20h14" />
+            </svg>
           </button>
         </div>
       </div>
@@ -134,6 +143,24 @@ const today = computed(() =>
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.install-button.icon-button {
+  width: auto;
+  min-height: 0;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .install-button {

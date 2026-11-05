@@ -361,7 +361,7 @@ export const useWorkoutStore = defineStore("workout", () => {
     }
     const record: PlanRecord = {
       id: "current",
-      plan,
+      plan: plainCopy(plan),
       receivedAt: new Date().toISOString(),
       override: null,
     };
@@ -381,7 +381,7 @@ export const useWorkoutStore = defineStore("workout", () => {
   async function selectRoutine(id: string | null): Promise<void> {
     if (!planRecord.value) return;
     const record: PlanRecord = {
-      ...planRecord.value,
+      ...plainCopy(planRecord.value),
       override: { day: localDayKey(new Date()), routineId: id },
     };
     planRecord.value = record;
@@ -465,4 +465,9 @@ function requestStoragePersistence() {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "error desconocido";
+}
+
+/** IndexedDB no admite los proxies reactivos de Vue: se guarda una copia plana. */
+function plainCopy<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
